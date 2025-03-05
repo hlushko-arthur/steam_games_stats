@@ -1,77 +1,138 @@
 import express from 'express';
+import passport from 'passport'
+import passportSteam from 'passport-steam';
+import Steam from './steam.collection.js';
+import session from 'express-session';
+import axios from 'axios';
+const SteamStrategy = passportSteam.Strategy;
+
 
 const router = express.Router()
 const API_KEY = process.env.STEAM_API_KEY;
 
-import Steam from './steam.collection.js';
+passport.serializeUser((user, done) => {
+	done(null, user);
+});
 
-router.get('/get_user_data', async (req, res) => {
-	const steamID = req.query.steamID;
+// Deserialize user from session
+passport.deserializeUser((obj, done) => {
+	done(null, obj);
+});
 
-	const steamData = await Steam.findOne({
-		"user.steamId": steamID
-	})
+passport.use(new SteamStrategy({
+	returnURL: 'http://localhost:3000/steam/auth/return',
+	realm: 'http://localhost:3000/',
+	apiKey: API_KEY
+}, (identifier, profile, done) => {
+	process.nextTick(function () {
+		profile.identifier = identifier
 
-	// if (steamData) {
-	// 	res.status(200).json({ status: true, data: steamData });
-	// 	return;
-	// }
+		return done(null, profile);
+	});
+}));
 
-	try {
-		let games = await getUserGames(steamID);
+router.use(session({ secret: 's3cr3tStr1nG', resave: false, saveUninitialized: false }));
+router.use(passport.initialize());
+router.use(passport.session());
 
-		// games = games.slice(0, 5);
+router.get('/', async (req, res) => {
+	const url = 'https://store.steampowered.com/pointssummary/ajaxgetasyncconfig';
+	console.log(url);
 
-		await Promise.all(games.map(async (game) => {
-			const userAchievements = await checkGameAchievements(game, steamID);
 
-			game.userAchievements = userAchievements;
+	const response = await fetch(url);
 
-			const gameAchievements = await getGameAchievements(game.appid);
+	console.log(response)
 
-			game.achievements = gameAchievements;
-		}))
+	res.send({ test: 'test', response: response });
+});
 
-		games = games.map((game) => {
-			return {
-				playtime: game.playtime_forever,
-				icon: game.img_icon_url,
-				_id: game.appid,
-				name: game.name,
-				lastDatePlayed: game.rtime_last_played,
-				achievements: game.achievements,
-				userAchievements: game.userAchievements
-			}
-		})
 
-		const user = await getUserInformation(steamID);
+router.get('/auth', passport.authenticate('steam', { failureRedirect: '/steam' }), (req, res) => {
+	res.redirect('/steam/');
 
-		let steamSchema = await Steam.findOne({
+});
+
+router.get('/auth/return',
+	passport.authenticate('steam', { failureRedirect: '/steam/' }),
+	(req, res) => {
+		// Successful authentication, redirect home or to another page
+		res.redirect('/steam/');
+	}
+);
+
+router.get('/get_user_data',
+	async (req, res) => {
+		const steamID = req.query.steamID;
+
+		const steamData = await Steam.findOne({
 			"user.steamId": steamID
 		})
 
-		if (!steamSchema) {
-			steamSchema = new Steam({
-				user: user,
-				games: games
+		// if (steamData) {
+		// 	res.status(200).json({ status: true, data: steamData });
+		// 	return;
+		// }
+
+		try {
+			let games = await getUserGames(steamID);
+
+			// games = games.slice(0, 5);
+
+			await Promise.all(games.map(async (game) => {
+				const userAchievements = await checkGameAchievements(game, steamID);
+
+				game.userAchievements = userAchievements;
+
+				const gameAchievements = await getGameAchievements(game.appid);
+
+				game.achievements = gameAchievements;
+			}))
+
+			// games = games.map((game) => {
+			// 	return {
+			// 		playtime: game.playtime_forever,
+			// 		icon: game.img_icon_url,
+			// 		_id: game.appid,
+			// 		name: game.name,
+			// 		lastDatePlayed: game.rtime_last_played,
+			// 		achievements: game.achievements,
+			// 		userAchievements: game.userAchievements
+			// 	}
+			// })
+
+			const user = await getUserInformation(steamID);
+
+			let steamSchema = await Steam.findOne({
+				"user.steamId": steamID
 			})
 
-			await steamSchema.save();
-		} else {
-			await Steam.updateOne({
-				"user.steamId": steamID
-			}, {
-				user: user,
-				games: games
-			});
-		}
+			if (!steamSchema) {
+				steamSchema = new Steam({
+					user: user,
+					games: games
+				})
 
-		res.status(200).json({ status: true, data: steamSchema });
-	} catch (error) {
-		console.log(error);
-		res.status(400).json(error)
-	}
-})
+				await steamSchema.save();
+			} else {
+				await Steam.updateOne({
+					"user.steamId": steamID
+				}, {
+					user: user,
+					games: games
+				});
+
+				steamSchema = await Steam.findOne({
+					"user.steamId": steamID
+				})
+			}
+
+			res.status(200).json({ status: true, data: games });
+		} catch (error) {
+			console.log(error);
+			res.status(400).json(error)
+		}
+	})
 
 async function getUserInformation(steamId) {
 	const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${API_KEY}&steamids=${steamId}`;
@@ -111,8 +172,12 @@ async function getGameAchievements(appId) {
 
 }
 
+const ACCESS_TOKEN = 'eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInI6MDAwRV8yNUYxMkQ4MF8yNUY4NyIsICJzdWIiOiAiNzY1NjExOTk0NzA4MjI3OTkiLCAiYXVkIjogWyAid2ViOnN0b3JlIiBdLCAiZXhwIjogMTc0MTI3MzQyOCwgIm5iZiI6IDE3MzI1NDcwMTgsICJpYXQiOiAxNzQxMTg3MDE4LCAianRpIjogIjAwMTZfMjVGMTJEODVfMkQzQTEiLCAib2F0IjogMTc0MTE4NzAxNywgInJ0X2V4cCI6IDE3NTkyNDczMDMsICJwZXIiOiAwLCAiaXBfc3ViamVjdCI6ICIxODguMTYzLjEyMC4zOSIsICJpcF9jb25maXJtZXIiOiAiMTg4LjE2My4xMjAuMzkiIH0.oGoEL_QYefOu3KoQPlmOCNV3pizCyskkeqZ9WOqMGNfW7t7kmYl-C0XoQufO5L1Bz9OvJmr2KnY0jCdM1j2gAw';
+
 async function getUserGames(steamID) {
-	const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${API_KEY}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true`;
+	// const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${API_KEY}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true&include_extended_appinfo=true`;
+
+	const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?access_token=${ACCESS_TOKEN}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true`;
 
 	try {
 		const response = await fetch(url);
