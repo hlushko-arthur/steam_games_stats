@@ -5,22 +5,28 @@ import { AppComponent } from './app.component';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { provideHttpClient } from '@angular/common/http';
-
+import { LoginComponent } from './pages/guest/login/login.component';
+import { HeaderComponent } from './core/components/header/header.component';
 const routes: Routes = [
 	{
 		path: '',
 		component: DashboardComponent
 	},
 	{
+		path: 'login',
+		component: LoginComponent
+	},
+	{
 		path: '**',
 		redirectTo: 'dashboard',
 		pathMatch: 'full'
-	}
+	},
 ];
 
 @NgModule({
 	declarations: [
 		AppComponent,
+		HeaderComponent
 	],
 	imports: [
 		BrowserModule,

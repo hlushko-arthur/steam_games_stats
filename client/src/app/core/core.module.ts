@@ -1,5 +1,5 @@
 import { NgModule } from "@angular/core";
-import { InputComponent } from "./components/input/input.component";
+import { InputComponent } from "./modules/input/input.component";
 import { CommonModule } from "@angular/common";
 import { DateFormatPipe } from "./pipes/date-format.pipe";
 import { TimeFormatPipe } from "./pipes/time-format.pipe";

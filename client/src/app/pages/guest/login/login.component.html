@@ -1,0 +1,48 @@
+<div class="container">
+	<div class="content">
+		<!-- <div class="content_item">
+			<div class="button" (click)="loginViaSteam()">
+				<img src="/assets/icons/steam.svg">
+				LOGIN WITH STEAM
+			</div>
+		</div>
+	
+		<div class="content_item">
+			<div class="button" (click)="loginManually()">
+				LOGIN MANUALLY TO STEAM
+			</div>
+			<span>To get extended information about your profile and games</span>
+		</div> -->
+
+		<div class="content_header">
+			<h2>Sign in</h2>
+		</div>
+
+		<div class="form">
+			<div class="form_creds">
+				<div class="form_creds_item">
+					<h4>SIGN IN WITH ACCOUNT NAME</h4>
+					<input type="text">
+				</div>
+	
+				<div class="form_creds_item">
+					<h4>PASSWORD</h4>
+					<input [type]="isPasswordVisible ? 'text' : 'password'">
+					<img (click)="changePasswordVisibility()" src="/assets/icons/eye{{isPasswordVisible ? '-closed' : ''}}.png" alt="">
+				</div>
+	
+				<div class="form_creds_item">
+					<button class="button">
+						Sign in
+					</button>
+				</div>
+			</div>
+
+			<div class="form_qr">
+				<h4>OR SIGN IN WITH QR</h4>
+				<img src="https://docs.lightburnsoftware.com/legacy/img/QRCode/ExampleCode.png" alt="">
+				<h5>Use the Steam Mobile App to sign in via QR code</h5>
+			</div>
+		</div>
+	</div>
+</div>

@@ -10,6 +10,6 @@ export class SteamService {
 	constructor(private _http: HttpService) { }
 
 	async fetchUserData(steamId: string): Promise<UserProfile> {
-		return await this._http.get(`http://localhost:3000/steam/get_user_data?steamID=${steamId}`);
+		return await this._http.get(`api/steam/get_user_data?steamID=${steamId}`);
 	}
 }

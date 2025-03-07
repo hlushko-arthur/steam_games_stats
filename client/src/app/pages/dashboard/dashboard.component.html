@@ -1,8 +1,4 @@
 <div class="container">
-	<div class="header">
-		<wInput></wInput>
-	</div>
-
 	<div *ngIf="user.steamId" class="content">
 		<div class="content_left">
 			<div class="df">
@@ -169,7 +165,6 @@
 								<th>Completion</th>
 								<th>Achievements</th>
 								<th>Playtime</th>
-								<th>Last Played</th>
 							</tr>
 						</thead>
 
@@ -203,10 +198,6 @@
 
 								<td class="games_item_playtime">
 									{{game.playtime | timeFormat}}
-								</td>
-
-								<td class="games_item_last-palyed">
-									{{game.lastDatePlayed | dateFormat : 'YYYY MMM HH:mm'}}
 								</td>
 							</tr>
 						</tbody>

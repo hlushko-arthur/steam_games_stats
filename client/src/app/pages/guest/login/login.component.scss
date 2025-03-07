@@ -1,0 +1,124 @@
+.container {
+	background-color: var(--c-grey);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		height: auto;
+		align-items: center;
+		width: 700px;
+
+		&_header {
+			margin-bottom: 12px;
+		}
+
+		.form {
+			background-color: var(--c-light-grey);
+			width: 100%;
+			height: auto;
+			padding: 24px;
+			box-sizing: border-box;
+			display: flex;
+			border-radius: 5px;
+
+			&_creds {
+				display: flex;
+				flex-direction: column;
+				width: 100%;
+				height: 100%;
+				margin-right: 24px;
+
+				&_item {
+					width: 100%;
+					margin-bottom: 24px;
+					position: relative;
+
+					img {
+						position: absolute;
+						top: 40px;
+						right: 0;
+						cursor: pointer;
+					}
+
+					&:last-child {
+						display: flex;
+						justify-content: center;
+						margin-top: 12px;
+					}
+
+					h4 {
+						margin-bottom: 6px;
+					}
+				}
+
+				input {
+					outline: none;
+					border: none;
+					border-radius: 5px;
+					height: 48px;
+					width: 100%;
+					background-color: var(--c-dark-grey);
+					color: var(--c-text);
+					padding: 6px;
+					font-size: 16px;
+				}
+
+				button {
+					background-color: var(--c-button);
+					outline: none;
+					height: 48px;
+					width: 164px;
+					font-size: 17px;
+					padding: 10px;
+					color: #f0f0f0;
+					border: none;
+					border-radius: 5px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					transition: all 0.1s;
+					cursor: pointer;
+					box-shadow: 0 0 3px var(--c-border-grey);
+
+					&:hover {
+						filter: brightness(0.9);
+					}
+				}
+			}
+
+			&_qr {
+				width: 230px;
+
+				img {
+					margin: 6px 0;
+					width: 230px;
+					height: 230px;
+				}
+			}
+		}
+
+		// &_item {
+		// 	.button {
+		// 		height: 50px;
+		// 		width: 300px;
+		// 		background-color: var(--c-button);
+		// 		display: flex;
+		// 		justify-content: center;
+		// 		align-items: center;
+		// 		border-radius: 6px;
+		// 		cursor: pointer;
+
+		// 		img {
+		// 			width: 32px;
+		// 			height: 32px;
+		// 			margin-right: 12px;
+		// 		}
+		// 	}
+		// }
+	}
+}

@@ -3,7 +3,8 @@ import passport from 'passport'
 import passportSteam from 'passport-steam';
 import Steam from './steam.collection.js';
 import session from 'express-session';
-import axios from 'axios';
+import { EAuthTokenPlatformType, LoginSession } from 'steam-session';
+
 const SteamStrategy = passportSteam.Strategy;
 
 
@@ -37,12 +38,7 @@ router.use(passport.session());
 
 router.get('/', async (req, res) => {
 	const url = 'https://store.steampowered.com/pointssummary/ajaxgetasyncconfig';
-	console.log(url);
-
-
 	const response = await fetch(url);
-
-	console.log(response)
 
 	res.send({ test: 'test', response: response });
 });
@@ -56,7 +52,6 @@ router.get('/auth', passport.authenticate('steam', { failureRedirect: '/steam' }
 router.get('/auth/return',
 	passport.authenticate('steam', { failureRedirect: '/steam/' }),
 	(req, res) => {
-		// Successful authentication, redirect home or to another page
 		res.redirect('/steam/');
 	}
 );
@@ -89,17 +84,17 @@ router.get('/get_user_data',
 				game.achievements = gameAchievements;
 			}))
 
-			// games = games.map((game) => {
-			// 	return {
-			// 		playtime: game.playtime_forever,
-			// 		icon: game.img_icon_url,
-			// 		_id: game.appid,
-			// 		name: game.name,
-			// 		lastDatePlayed: game.rtime_last_played,
-			// 		achievements: game.achievements,
-			// 		userAchievements: game.userAchievements
-			// 	}
-			// })
+			games = games.map((game) => {
+				return {
+					playtime: game.playtime_forever,
+					icon: game.img_icon_url,
+					_id: game.appid,
+					name: game.name,
+					lastDatePlayed: game.rtime_last_played,
+					achievements: game.achievements,
+					userAchievements: game.userAchievements
+				}
+			})
 
 			const user = await getUserInformation(steamID);
 
@@ -127,7 +122,7 @@ router.get('/get_user_data',
 				})
 			}
 
-			res.status(200).json({ status: true, data: games });
+			res.status(200).json({ status: true, data: steamSchema });
 		} catch (error) {
 			console.log(error);
 			res.status(400).json(error)
@@ -172,12 +167,10 @@ async function getGameAchievements(appId) {
 
 }
 
-const ACCESS_TOKEN = 'eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInI6MDAwRV8yNUYxMkQ4MF8yNUY4NyIsICJzdWIiOiAiNzY1NjExOTk0NzA4MjI3OTkiLCAiYXVkIjogWyAid2ViOnN0b3JlIiBdLCAiZXhwIjogMTc0MTI3MzQyOCwgIm5iZiI6IDE3MzI1NDcwMTgsICJpYXQiOiAxNzQxMTg3MDE4LCAianRpIjogIjAwMTZfMjVGMTJEODVfMkQzQTEiLCAib2F0IjogMTc0MTE4NzAxNywgInJ0X2V4cCI6IDE3NTkyNDczMDMsICJwZXIiOiAwLCAiaXBfc3ViamVjdCI6ICIxODguMTYzLjEyMC4zOSIsICJpcF9jb25maXJtZXIiOiAiMTg4LjE2My4xMjAuMzkiIH0.oGoEL_QYefOu3KoQPlmOCNV3pizCyskkeqZ9WOqMGNfW7t7kmYl-C0XoQufO5L1Bz9OvJmr2KnY0jCdM1j2gAw';
-
 async function getUserGames(steamID) {
-	// const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${API_KEY}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true&include_extended_appinfo=true`;
+	const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true`;
 
-	const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?access_token=${ACCESS_TOKEN}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true`;
+	// const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?access_token=${ACCESS_TOKEN}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true`;
 
 	try {
 		const response = await fetch(url);
@@ -209,6 +202,16 @@ async function getSteamId(username) {
 	const data = await response.json();
 
 	return data.response.steamid;
+
+}
+
+router.get('/m-auth', async (req, res) => {
+	await main();
+})
+
+async function main() {
+
+
 
 }
 
