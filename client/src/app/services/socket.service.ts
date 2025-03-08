@@ -7,17 +7,21 @@ import { io, Socket } from "socket.io-client";
 
 export class SocketService {
 
-	socket: Socket
+	private _socket: Socket
 
 	constructor() {
-		this.socket = io('ws://localhost:4200', {
+		this._socket = io('ws://localhost:4200', {
 			path: '/api/socket.io',
 			transports: ['websocket']
 		});
+
+		this._socket.on('connected', (_id: string) => {
+			console.log(_id);
+		})
 	}
 
 	on(name: string, cb: (resp: any) => void = () => { }): void {
-		this.socket.on(name, (resp: any) => {
+		this._socket.on(name, (resp: any) => {
 			cb(resp);
 		})
 	}

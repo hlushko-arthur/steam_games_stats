@@ -16,8 +16,9 @@ export interface Game {
 	icon: string;
 	name: string;
 	playtime: number;
-	lastDatePlayed: number;
+	lastPlayed: number;
 	userAchievements: UserAchievement[];
+	isPerfect?: boolean;
 }
 
 export interface User {
@@ -29,5 +30,7 @@ export interface User {
 
 export interface UserProfile {
 	user: User;
-	games: Game[]
+	games: Game[];
+	steamId: string;
+	lastDateUpdated: number;
 }

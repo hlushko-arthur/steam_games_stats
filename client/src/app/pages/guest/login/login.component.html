@@ -24,13 +24,14 @@
 					<h4>SIGN IN WITH ACCOUNT NAME</h4>
 					<input type="text">
 				</div>
-	
+
 				<div class="form_creds_item">
 					<h4>PASSWORD</h4>
 					<input [type]="isPasswordVisible ? 'text' : 'password'">
-					<img (click)="changePasswordVisibility()" src="/assets/icons/eye{{isPasswordVisible ? '-closed' : ''}}.png" alt="">
+					<img (click)="changePasswordVisibility()"
+						src="/assets/icons/eye{{isPasswordVisible ? '-closed' : ''}}.png" alt="">
 				</div>
-	
+
 				<div class="form_creds_item">
 					<button class="button">
 						Sign in
@@ -40,7 +41,7 @@
 
 			<div class="form_qr">
 				<h4>OR SIGN IN WITH QR</h4>
-				<img src="https://docs.lightburnsoftware.com/legacy/img/QRCode/ExampleCode.png" alt="">
+				<img [src]="qrCode" alt="">
 				<h5>Use the Steam Mobile App to sign in via QR code</h5>
 			</div>
 		</div>

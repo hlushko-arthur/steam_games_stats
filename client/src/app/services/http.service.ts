@@ -10,8 +10,11 @@ import { Response } from '../core/interfaces/api.interface';
 export class HttpService {
 	constructor(private _httpClient: HttpClient, private _router: Router) { }
 
+	private readonly _prefix = '/api';
+
 	post(url: string, payload: any): Promise<any> {
 		// url = environment.serverUrl + url;
+		url = this._prefix + url;
 
 		return new Promise((resolve, reject) => {
 			this._httpClient.post<unknown>(url, payload).subscribe(
@@ -29,6 +32,8 @@ export class HttpService {
 
 	get<T = any>(url: string): Promise<T> {
 		// url = environment.serverUrl + url;
+
+		url = this._prefix + url;
 
 		return new Promise<T>((resolve, reject) => {
 			this._httpClient.get<Response<T>>(url).subscribe(

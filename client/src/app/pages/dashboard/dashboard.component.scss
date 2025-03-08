@@ -5,11 +5,19 @@
 	height: 100%;
 }
 
+.background {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 0;
+}
+
 .content {
 	height: max-content;
 	width: 100%;
 	padding: 12px;
-	background-color: var(--c-grey);
+	// background-color: var(--c-grey);
+	z-index: 1;
 
 	&_left {
 		width: 856px;
@@ -83,10 +91,6 @@
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
-
-			&_title {
-				img {}
-			}
 		}
 
 		&_item:not(:last-child) {
@@ -155,10 +159,6 @@
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
-
-			&_title {
-				img {}
-			}
 		}
 
 		&_item:not(:last-child) {
@@ -260,29 +260,48 @@
 }
 
 .games-container {
+	margin-top: 24px;
 
 	.header {
 		display: flex;
 		justify-content: space-between;
 	}
 
+	table {
+		border-collapse: collapse;
+		width: 100%;
+
+		thead {
+			height: 40px;
+		}
+
+		th {
+			font-weight: 400;
+		}
+	}
+
 	.games {
 		&_item {
+			border-top: 1px solid var(--c-light-grey);
+			height: 60px;
 
 			&_title {
 				max-width: 300px;
 				display: flex;
 				align-items: center;
+				height: 100%;
 
 				&_img {
 					margin-right: 6px;
 
 					img {
-						border: 3px solid #171d21;
+						border: 2px solid #171d21;
 						border-radius: 5px;
 						width: 120px;
 						height: 45px;
 						object-fit: cover;
+						position: relative;
+						z-index: 1;
 					}
 				}
 			}
@@ -310,12 +329,48 @@
 				.progress-fill {
 					height: 100%;
 					width: 0%;
-					background: linear-gradient(to right, #b0e000, #9bcf00);
+					background: #9bcf00;
 					border-radius: 8px;
 					transition: width 0.5s ease-in-out;
+
+					&.perfect {
+						background: var(--c-gold);
+					}
 				}
 
 			}
+
+			&_achievements,
+			&_playtime,
+			&_lastplayed,
+			&_completion {
+				text-align: center;
+			}
+
+			&.perfect {
+				color: var(--c-gold);
+				position: relative;
+				text-shadow: 1px 1px 4px var(--c-orange);
+
+				.games_item_title_img img {
+					border: 2px solid var(--c-gold);
+					box-shadow: 1px 1px 4px var(--c-gold);
+				}
+			}
+
+			&.perfect::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-color: var(--c-gold);
+				opacity: 0.1;
+				z-index: 0;
+			}
+
 		}
+
 	}
 }

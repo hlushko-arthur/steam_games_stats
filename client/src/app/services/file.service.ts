@@ -10,6 +10,8 @@ export class FileService {
 
 	readonly avatarDomain = 'https://avatars.steamstatic.com';
 
+	readonly profileDomain = 'https://cdn.fastly.steamstatic.com/steamcommunity/public/images/items/';
+
 	file(appId: number, icon: string): string {
 		return `${this.appDomain}/${appId}/${icon}.jpg`
 	}
@@ -20,5 +22,9 @@ export class FileService {
 
 	gameHeader(appId: number): string {
 		return `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`
+	}
+
+	profileBackground(path: string): string {
+		return `${this.profileDomain}/${path}`;
 	}
 }
