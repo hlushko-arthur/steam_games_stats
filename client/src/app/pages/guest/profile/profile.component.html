@@ -1,0 +1,353 @@
+<div class="container" *ngIf="games.length">
+	<div class="backdrop">
+		<!-- <video playsinline [autoplay]="true" [muted]="true" [loop]="true">
+			<source
+				src="https://cdn.fastly.steamstatic.com/steamcommunity/public/images/items/1091500/75b1a9153e13599d66d16853be815a6f1fffaeeb.webm"
+				type="video/webm">
+		</video> -->
+		<div class="image" [style.background-image]="'url(' + fs.gameBackgroundV6(games[0]._id) + ')'"></div>
+	</div>
+	<div *ngIf="user.steamId" class="content">
+		<div class="content_sidebar">
+			CO
+		</div>
+		<div class="content_left">
+			<div class="df">
+				<div class="profile-info">
+					<div class="profile-info_title">
+						<div class="profile-info_title_avatar">
+							<!-- <img [src]="fs.avatar(user.avatar, 'full')"> -->
+							<img class="avatar"
+								src="https://cdn.fastly.steamstatic.com/steamcommunity/public/images/items/594650/36d25858eb7d74231188b8f7b53201ff79463b8c.gif"
+								alt="">
+							<img class="frame"
+								src="https://cdn.fastly.steamstatic.com/steamcommunity/public/images/items/860950/59638b6ad5810a92a5692fc8a19825f64f21b627.png"
+								alt="">
+						</div>
+						<div class="profile-info_title_description">
+							<div class="profile-info_title_description_title">
+								<div class="profile-info_title_description_title_name">{{user.name}}</div>
+								<div class="profile-info_title_description_title_circle">40</div>
+							</div>
+							<span class="desc">2 years on Steam</span>
+							<span class="desc">Since Jan 2023</span>
+						</div>
+					</div>
+					<div class="profile-info_bottom">
+						<div class="profile-info_bottom_item">
+							<div class="profile-info_bottom_item_title">
+								<img src="/assets/icons/games.png">
+								{{games.length}}
+							</div>
+
+							<div class="desc">
+								Games
+							</div>
+						</div>
+						<div class="profile-info_bottom_item">
+							<div class="profile-info_bottom_item_title">
+								<img src="/assets/icons/trophy-grey.png">
+								{{stats.achievements.gained}}
+							</div>
+
+							<div class="desc">
+								Achievements
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="last-game">
+					<div class="last-game_title">
+						<div class="last-game_title_img">
+							<img [src]="fs.gameHeader(games[0]._id)">
+						</div>
+						<div class="last-game_title_description">
+							{{games[0].name}}
+						</div>
+					</div>
+
+					<div class="last-game_achievements">
+						<div class="last-game_achievements_item"
+							*ngFor="let achievement of games[0].achievements | slice:0:10">
+							<img [src]="fs.file(games[0]._id, achievement.icon)">
+						</div>
+					</div>
+
+					<div class="last-game_bottom">
+						<div class="last-game_bottom_item">
+							<div class="last-game_bottom_item_title">
+								<img src="/assets/icons/clock.png">
+								{{games[0].playtime | timeFormat}}
+							</div>
+
+							<div class="desc">
+								Playtime
+							</div>
+						</div>
+						<div class="last-game_bottom_item">
+							<div class="last-game_bottom_item_title">
+								<img src="/assets/icons/trophy-grey.png">
+								{{games[0].achievementsUnlocked}} / {{games[0].achievements.length}}
+							</div>
+
+							<div class="desc">
+								Achievements
+							</div>
+						</div>
+						<div class="last-game_bottom_item">
+							<div class="last-game_bottom_item_title">
+								<img src="/assets/icons/games.png">
+								{{getCompletionNumber(games[0])}}%
+							</div>
+
+							<div class="desc">
+								Completion
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="some-stats">
+				<div class="some-stats_item">
+					<div class="some-stats_item_title">
+						<img src="/assets/icons/trophy-blue.png">
+						<span class="blue">{{stats.achievements.gained}}</span>
+					</div>
+
+					<div class="some-stats_item_description">
+						Achievements
+					</div>
+				</div>
+
+				<div class="some-stats_item">
+					<div class="some-stats_item_title">
+						<div class="some-stats_item_title_progress-container">
+							<svg class="some-stats_item_title_progress-container_ring" width="120" height="120">
+								<circle class="background" cx="60" cy="60" r="50"></circle>
+								<circle class="progress" cx="60" cy="60" r="50"></circle>
+							</svg>
+							<div class="some-stats_item_title_progress-container_value">
+								<span>66</span>
+								<span>%</span>
+							</div>
+						</div>
+
+					</div>
+
+					<div class="some-stats_item_description">
+						Average Completion
+					</div>
+				</div>
+
+				<div class="some-stats_item">
+					<div class="some-stats_item_title">
+						<img src="/assets/icons/star.png">
+						<span class="gold">{{stats.games.perfect}}</span>
+					</div>
+
+					<div class="some-stats_item_description">
+						Perfect Games
+					</div>
+				</div>
+			</div>
+
+			<div class="games-container">
+				<div class="header">
+					<div>
+						13 Recent games
+					</div>
+
+					<div class="header_actions">
+
+					</div>
+				</div>
+				<div class="games">
+					<table>
+						<thead>
+							<tr>
+								<th>Game</th>
+								<th>Completion</th>
+								<th>Achievements</th>
+								<th>Playtime</th>
+								<th>Last Played</th>
+							</tr>
+						</thead>
+
+						<tbody>
+							<tr class="games_item" [class.perfect]="game.isPerfect"
+								*ngFor="let game of games | slice: 0 : 13">
+								<td class="games_item_title">
+									<div class="games_item_title_img">
+										<img [src]="fs.gameHeader(game._id)" alt="">
+									</div>
+									<div class="games_item_title_name">
+										{{game.name}}
+									</div>
+								</td>
+
+								<td class="games_item_completion">
+									<div class="progress-bar">
+										<div class="progress-fill" [class.perfect]="game.isPerfect"
+											[style.width]="getCompletionNumber(game) + '%'">
+										</div>
+									</div>
+
+								</td>
+
+								<td class="games_item_achievements">
+									<span>
+										<img src="/assets/icons/trophy-{{game.isPerfect ? 'gold' : 'grey'}}.png">
+									</span>
+									<span>
+										{{game.achievementsUnlocked}} <span *ngIf="!game.isPerfect">/
+											{{game.achievements.length}}</span>
+									</span>
+								</td>
+
+								<td class="games_item_playtime">
+									{{game.playtime | timeFormat}}
+								</td>
+
+								<td class="games_item_lastplayed">
+									{{game.lastPlayed | dateFormat : 'MMM DD YYYY'}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="content_right">
+			<div class="stats">
+				<div class="stats_block-container">
+					<div class="stats_block">
+						<div class="stats_block_header">
+							<img src="/assets/icons/trophy-grey.png" alt="">
+							Achievements
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.achievements.total}}</span>
+							<span class="stats_block_text">Total Achievements</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.achievements.gained}}</span>
+							<span class="stats_block_text">Gained</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.achievements.toPerfection}}</span>
+							<span class="stats_block_text">to Perfection</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.achievements.untouched}}</span>
+							<span class="stats_block_text">in Untouched</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.achievements.dailyMax}}</span>
+							<span class="stats_block_text">Daily Maximum</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.achievements.dailyAverage}}</span>
+							<span class="stats_block_text">Daily Average</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="stats_block-container">
+					<div class="stats_block">
+						<div class="stats_block_header">
+							<img src="/assets/icons/games.png" alt="">
+							Games
+						</div>
+						<div class="stats_block_item">
+							<span>{{stats.games.owned}}</span>
+							<span class="stats_block_text">Total Games</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.games.withAchievements}}</span>
+							<span class="stats_block_text">with achievements</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.games.inProgress}}</span>
+							<span class="stats_block_text">in progress</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.games.started}}</span>
+							<span class="stats_block_text">started</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.games.played}}</span>
+							<span class="stats_block_text">..played</span>
+						</div>
+
+						<div class="stats_block_line"></div>
+
+						<div class="stats_block_item">
+							<span>{{stats.games.perfect}}</span>
+							<span class="stats_block_text">Perfect Games</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.games.started}}</span>
+							<span class="stats_block_text">started</span>
+						</div>
+
+						<div class="stats_block_item">
+							<span>{{stats.games.played}}</span>
+							<span class="stats_block_text">..played</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="stats_games"></div>
+			</div>
+
+			<div class="charts">
+				<div class="charts_header">
+					<div class="charts_header_button" [class.active]="activeChart === 'games'"
+						(click)="activeChart = 'games'">
+						Game Completion
+					</div>
+
+					<div class="charts_header_button" [class.active]="activeChart === 'achievements'"
+						(click)="activeChart = 'achievements'">
+						Achievements Rarity
+					</div>
+				</div>
+
+				<div class="charts_content">
+					<chart *ngIf="activeChart === 'games'" [chartData]="stats.gamesChart"></chart>
+					<chart *ngIf="activeChart === 'achievements'" [chartData]="stats.achievementsChart"
+						sort="decreasing"></chart>
+				</div>
+			</div>
+
+			<div class="rarest-achievements">
+				<div class="rarest-achievements_item" *ngFor="let achievement of stats.rarestAchievements">
+					<img [src]="fs.file(achievement.appId, achievement.icon)">
+					<div class="rarest-achievements_item_content">
+						<div>
+							<span>{{gs.game(achievement.appId).name}}</span>
+							<span>{{achievement.rarity}}%</span>
+						</div>
+						<span class="desc">{{achievement.unlockTime | dateFormat: 'MMM DD YYYY'}}</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

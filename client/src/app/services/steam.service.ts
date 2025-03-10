@@ -9,14 +9,8 @@ import { UserProfile } from "../core/interfaces/steam.interface";
 export class SteamService {
 	constructor(private _http: HttpService) { }
 
-	async fetchUserData(steamId: string): Promise<UserProfile> {
+	async fetchProfile(steamId: string): Promise<UserProfile> {
 		const userData = await this._http.get<UserProfile>(`/steam/get_user_data?steamID=${steamId}`);
-
-		userData.games.forEach((game) => {
-			if (game.achievements.length && game.userAchievements.length === game.achievements.length) {
-				game.isPerfect = true;
-			}
-		})
 
 		return userData;
 	}

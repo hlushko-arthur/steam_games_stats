@@ -1,4 +1,7 @@
 .header {
 	height: 60px;
-	background-color: var(--c-light-grey);
+	background-color: var(--c-dark-grey);
+	z-index: 2;
+	position: sticky;
+	top: 0;
 }

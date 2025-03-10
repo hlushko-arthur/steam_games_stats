@@ -1,0 +1,49 @@
+.chart {
+	display: flex;
+	width: 100%;
+	justify-content: end;
+	letter-spacing: -1px;
+
+	&_bar {
+		font-size: 10px;
+		text-align: center;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		justify-content: end;
+		height: 335px;
+
+		&_fill {
+			transition: height 0.5s ease-out;
+			min-height: 1px;
+			width: 35px;
+			background-color: black;
+			margin-bottom: 6px;
+			border-radius: 5px 5px 0 0;
+			border: 1px solid var(--c-light-grey)
+		}
+
+		&_value {
+			font-size: 14px;
+			font-weight: 700;
+		}
+
+		&:nth-child(-n+6) {
+			.chart_bar_fill {
+				background-color: var(--c-orange);
+			}
+		}
+
+		&:nth-child(n+7):nth-child(-n+10) {
+			.chart_bar_fill {
+				background-color: var(--c-green);
+			}
+		}
+
+		&:last-child {
+			.chart_bar_fill {
+				background-color: var(--c-gold);
+			}
+		}
+	}
+}

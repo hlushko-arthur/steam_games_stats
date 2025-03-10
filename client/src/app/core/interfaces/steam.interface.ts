@@ -1,15 +1,25 @@
-export interface Achievement {
+interface BaseAchievement {
 	displayName: string;
 	icon: string;
 	icongray: string;
 	name: string;
+	rarity: number;
+	appId: number;
+	achieved: boolean;
+	unlockTime?: number;
 }
 
-export interface UserAchievement {
-	name: string;
+export type Achievement = BaseAchievement & ({
+	achieved: true;
 	unlockTime: number;
-}
+} | {
+	achieved: false;
+})
 
+// export type Achievement = BaseAchievement & {
+// 	achieved: boolean;
+// 	unlockTime?: number;
+// }
 export interface Game {
 	achievements: Achievement[];
 	_id: number;
@@ -17,7 +27,7 @@ export interface Game {
 	name: string;
 	playtime: number;
 	lastPlayed: number;
-	userAchievements: UserAchievement[];
+	achievementsUnlocked: number;
 	isPerfect?: boolean;
 }
 

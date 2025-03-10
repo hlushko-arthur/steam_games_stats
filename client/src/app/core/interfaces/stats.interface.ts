@@ -24,3 +24,14 @@ export interface StatsPlaytime {
 	median: number;
 	completions: number;
 }
+
+// export type StatsChart = Record<string, {
+// 	value: number, height: number
+// }>
+
+export interface StatsChart {
+	[key: string]: {
+		value: number;
+		height: number;
+	}
+}

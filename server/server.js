@@ -5,6 +5,9 @@ import 'dotenv/config';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
+import steamRoutes from "./steam/steam.api.js";
+import steamAuthRoutes from './steam/steam-auth.api.js';
+
 const app = express();
 const PORT = 3000;
 const server = createServer(app);
@@ -17,9 +20,6 @@ const io = new Server(server, {
     path: '/api/socket.io'
 });
 
-import steamRoutes from "./steam/steam.api.js";
-import steamAuthRoutes from './steam/steam-auth.api.js';
-
 const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/steam_achievements_manager";
 
 mongoose
@@ -31,7 +31,13 @@ app.use(cors());
 app.use('/api/steam', steamRoutes);
 app.use('/api/steam/auth', steamAuthRoutes);
 
+// const Users = {};
+
 io.on('connection', (socket) => {
+    // Users[socket.io] = '';
+    // socket.emit('connected', { socketId: socket.id });
+
+    // io.to(socket.id).emit('conneted', { socketId: socket.id })
     // console.log('A user connected to the socket', socket.id);
 });
 

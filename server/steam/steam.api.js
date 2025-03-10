@@ -1,85 +1,39 @@
 import express from 'express';
-import passport from 'passport'
-import passportSteam from 'passport-steam';
-import Steam from './steam.collection.js';
-import session from 'express-session';
-import { EAuthTokenPlatformType, LoginSession } from 'steam-session';
+import axios from 'axios';
 
-const SteamStrategy = passportSteam.Strategy;
+import User from '../user/user.collection.js';
 
 
 const router = express.Router()
 const API_KEY = process.env.STEAM_API_KEY;
 
-passport.serializeUser((user, done) => {
-	done(null, user);
-});
 
-// Deserialize user from session
-passport.deserializeUser((obj, done) => {
-	done(null, obj);
-});
-
-passport.use(new SteamStrategy({
-	returnURL: 'http://localhost:3000/steam/auth/return',
-	realm: 'http://localhost:3000/',
-	apiKey: API_KEY
-}, (identifier, profile, done) => {
-	process.nextTick(function () {
-		profile.identifier = identifier
-
-		return done(null, profile);
-	});
-}));
-
-router.use(session({ secret: 's3cr3tStr1nG', resave: false, saveUninitialized: false }));
-router.use(passport.initialize());
-router.use(passport.session());
-
-router.get('/', async (req, res) => {
-	const url = 'https://store.steampowered.com/pointssummary/ajaxgetasyncconfig';
-	const response = await fetch(url);
-
-	res.send({ test: 'test', response: response });
-});
-
-
-router.get('/auth', passport.authenticate('steam', { failureRedirect: '/steam' }), (req, res) => {
-	res.redirect('/steam/');
-
-});
-
-router.get('/auth/return',
-	passport.authenticate('steam', { failureRedirect: '/steam/' }),
-	(req, res) => {
-		res.redirect('/steam/');
-	}
-);
-
-router.get('/get_user_data',
+router.get('/fetch_profile',
 	async (req, res) => {
-		const steamID = req.query.steamID;
-
-		const steamData = await Steam.findOne({
-			"user.steamId": steamID
-		})
-
-		// if (steamData) {
-		// 	res.status(200).json({ status: true, data: steamData });
-		// 	return;
-		// }
-
 		try {
-			let games = await getUserGames(steamID);
+			const steamId = req.query.steamID;
 
-			// games = games.slice(0, 5);
+			const _user = await User.findOne({
+				"user.steamId": steamId
+			})
+
+			if (_user) {
+				res.status(200).json({ status: true, data: _clearResponse(_user) });
+				return;
+			}
+
+			const accessToken = (await User.findOne({
+				steamId: steamId
+			}))?.ACCESS_TOKEN || '';
+
+			let games = await getUserGames(steamId, accessToken);
+
+			if (!games) {
+				return;
+			}
 
 			await Promise.all(games.map(async (game) => {
-				const userAchievements = await checkGameAchievements(game, steamID);
-
-				game.userAchievements = userAchievements;
-
-				const gameAchievements = await getGameAchievements(game.appid);
+				const gameAchievements = await getGameAchievements(game.appid, steamId);
 
 				game.achievements = gameAchievements;
 			}))
@@ -90,110 +44,166 @@ router.get('/get_user_data',
 					icon: game.img_icon_url,
 					_id: game.appid,
 					name: game.name,
-					lastDatePlayed: game.rtime_last_played,
+					lastPlayed: game.rtime_last_played,
 					achievements: game.achievements,
 					userAchievements: game.userAchievements
 				}
 			})
 
-			const user = await getUserInformation(steamID);
+			const user = await getUserInformation(steamId);
 
-			let steamSchema = await Steam.findOne({
-				"user.steamId": steamID
+			let userSchema = await User.findOne({
+				steamId: steamId
 			})
 
-			if (!steamSchema) {
-				steamSchema = new Steam({
+			if (!userSchema) {
+				userSchema = new Steam({
 					user: user,
-					games: games
+					games: games,
+					lastProfileUpdate: Math.floor(Date.now() / 1000)
 				})
 
-				await steamSchema.save();
+				await userSchema.save();
 			} else {
-				await Steam.updateOne({
-					"user.steamId": steamID
+				await User.updateOne({
+					steamId: steamId
 				}, {
 					user: user,
-					games: games
+					games: games,
+					lastProfileUpdate: Math.floor(Date.now() / 1000)
 				});
 
-				steamSchema = await Steam.findOne({
-					"user.steamId": steamID
+				userSchema = await User.findOne({
+					steamId: steamId
 				})
 			}
 
-			res.status(200).json({ status: true, data: steamSchema });
+			res.status(200).json({ status: true, data: _clearResponse(userSchema) });
 		} catch (error) {
 			console.log(error);
-			res.status(400).json(error)
+
+			res.status(500).json({
+				status: false,
+				error: error.message || error
+			})
 		}
 	})
 
 async function getUserInformation(steamId) {
-	const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${API_KEY}&steamids=${steamId}`;
-
-	const response = await fetch(url);
-	const data = await response.json();
-
-	const userData = data.response.players[0];
-
-	return {
-		name: userData.personaname,
-		avatar: userData.avatarhash,
-		timeCreated: userData.timecreated,
-		steamId: userData.steamid,
-	}
-}
-
-async function getGameAchievements(appId) {
-	const url = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${API_KEY}&appid=${appId}`;
-
-	const response = await fetch(url);
-	const data = await response.json();
-
-	const regex = /\/([A-z0-9]*)\.jpg/
-
-	let achievements = data.game?.availableGameStats?.achievements || [];
-
-	return achievements.map((achievement) => {
-		return {
-			icon: achievement.icon.match(regex)[1],
-			iconGray: achievement.icongray.match(regex)[1],
-			displayName: achievement.displayName,
-			name: achievement.name,
-			description: achievement.description
-		}
-	});
-
-}
-
-async function getUserGames(steamID) {
-	const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${API_KEY}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true`;
-
-	// const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?access_token=${ACCESS_TOKEN}&steamid=${steamID}&include_appinfo=true&include_played_free_games=true`;
-
 	try {
+		const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${API_KEY}&steamids=${steamId}`;
+
 		const response = await fetch(url);
 		const data = await response.json();
-		return data.response.games || [];
+
+		const userData = data.response.players[0];
+
+		return {
+			name: userData.personaname,
+			avatar: userData.avatarhash,
+			timeCreated: userData.timecreated,
+			steamId: userData.steamid,
+		}
 	} catch (error) {
-		console.log(error);
-		return;
+		throw error;
 	}
 }
 
-async function checkGameAchievements(game, steamID) {
-	const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${API_KEY}&steamid=${steamID}&appid=${game.appid}`;
+async function getUserGames(steamId, accessToken) {
+	const baseUrl = 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/';
 
-	const response = await fetch(url);
-	const data = await response.json();
+	const params = new URLSearchParams({
+		steamid: steamId,
+		include_appinfo: true,
+		include_played_free_games: true
+	})
 
-	return (data.playerstats.achievements || []).filter((achievement) => achievement.achieved).map((achievement) => {
-		return {
-			name: achievement.apiname,
-			unlockTime: achievement.unlocktime
+	if (accessToken) {
+		params.append('access_token', accessToken);
+	} else {
+		params.append('key', API_KEY);
+	}
+
+	const url = `${baseUrl}?${params.toString()}`;
+
+	try {
+		const response = await axios.get(url);
+		return response.data.response.games || [];
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getGameAchievements(appId, steamId) {
+	try {
+		const url = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${API_KEY}&appid=${appId}`;
+
+		const response = await axios.get(url);
+
+		if (!response.data.game.availableGameStats) {
+			return [];
 		}
-	});
+
+		const achievements = (response.data.game.availableGameStats.achievements || []).reduce((obj, item) => {
+			obj[item.name] = item;
+			return obj;
+		}, {});
+
+		const userAchievements = await getUserAchievementsForGame(appId, steamId) || []
+
+		const percentageAchievements = await getAchievementPercentageForGame(appId);
+
+		for (const _achievement of userAchievements) {
+			achievements[_achievement.apiname].unlockTime = _achievement.unlocktime;
+
+			achievements[_achievement.apiname].achieved = true;
+		}
+
+		for (const _achievement of percentageAchievements) {
+			achievements[_achievement.name].rarity = _achievement.percent;
+		}
+
+		const regex = /\/([A-z0-9]*)\.jpg/
+
+		return Object.values(achievements).map((achievement) => {
+			return {
+				appId: appId,
+				icon: achievement.icon.match(regex)[1],
+				iconGray: achievement.icongray.match(regex)[1],
+				displayName: achievement.displayName,
+				name: achievement.name,
+				description: achievement.description,
+				achieved: achievement.achieved ?? false,
+				unlockTime: achievement.unlockTime,
+				rarity: achievement.rarity
+			}
+		});
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getUserAchievementsForGame(appId, steamId) {
+	try {
+		const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${API_KEY}&steamid=${steamId}&appid=${appId}`;
+
+		const response = await fetch(url);
+		const data = await response.json();
+		return (data.playerstats.achievements || []).filter((achievement) => achievement.achieved);
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getAchievementPercentageForGame(appId) {
+	try {
+		const url = `https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?key=${API_KEY}&gameid=${appId}`;
+
+		const response = await axios.get(url);
+		return response.data.achievementpercentages.achievements || [];
+	} catch (error) {
+		throw error;
+	}
 }
 
 async function getSteamId(username) {
@@ -205,14 +215,12 @@ async function getSteamId(username) {
 
 }
 
-router.get('/m-auth', async (req, res) => {
-	await main();
-})
+function _clearResponse(data) {
+	const _data = JSON.parse(JSON.stringify(data));
 
-async function main() {
+	delete _data.ACCESS_TOKEN;
 
-
-
+	return _data;
 }
 
 export default router;

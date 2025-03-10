@@ -1,0 +1,10 @@
+<div class="chart">
+	<ng-container>
+		<div *ngFor="let data of chartData | keyvalue: sortChartOrder" class="chart_bar">
+			<span class="chart_bar_value">{{data.value.value}}</span>
+			<div class="chart_bar_fill" [style.height]="isChartLoaded ? data.value.height + 'px' : '0px'">
+			</div>
+			{{data.key}}
+		</div>
+	</ng-container>
+</div>

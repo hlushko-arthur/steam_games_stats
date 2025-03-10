@@ -27,4 +27,8 @@ export class FileService {
 	profileBackground(path: string): string {
 		return `${this.profileDomain}/${path}`;
 	}
+
+	gameBackgroundV6(appId: number): string {
+		return `https://steamcdn-a.akamaihd.net/steam/apps/${appId}/page_bg_generated_v6.jpg`;
+	}
 }
