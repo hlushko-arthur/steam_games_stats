@@ -1,0 +1,86 @@
+<div class="container">
+	<div class="header">
+
+	</div>
+
+	<div class="content">
+		<table>
+			<thead>
+				<tr>
+					<th>Game</th>
+					<th>Completion</th>
+					<th>Achievements</th>
+					<th>Playtime</th>
+					<th>Recent Playtime</th>
+					<th>Last Played</th>
+					<th>Game Rating</th>
+					<th>Review Score</th>
+					<th>Developer</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<tr class="content_item" [class.perfect]="game.isPerfect"
+					*ngFor="let game of games">
+					<td class="content_item_title">
+						<div class="content_item_title_img">
+							<img [src]="fs.gameHeader(game._id)" alt="">
+						</div>
+						<div class="content_item_title_name">
+							{{game.name}}
+						</div>
+					</td>
+
+					<td class="content_item_completion">
+						<div class="progress-bar">
+							<div class="progress-fill" [class.perfect]="game.isPerfect"
+								[style.width]="getCompletionNumber(game) + '%'">
+							</div>
+						</div>
+
+					</td>
+
+					<td class="content_item_achievements">
+						<span>
+							<img src="/assets/icons/trophy-{{game.isPerfect ? 'gold' : 'grey'}}.png">
+						</span>
+						<span>
+							<ng-container *ngIf="game.achievementsUnlocked; else noAchievements">
+								{{game.achievementsUnlocked}} <span *ngIf="!game.isPerfect">/
+									{{game.achievements.length}}</span>
+							</ng-container>
+
+							<ng-template #noAchievements>
+								{{game.achievements.length}}
+							</ng-template>
+						</span>
+					</td>
+
+					<td class="content_item_playtime">
+						{{game.playtime | timeFormat}}
+					</td>
+
+					<td class="content_item_recent-playtime">
+						+{{game.recentPlaytime | timeFormat}}
+					</td>
+
+					<td class="content_item_lastplayed">
+						{{game.lastPlayed | dateFormat : 'MMM DD YYYY'}}
+					</td>
+
+					<td>
+						{{game.review.rating}}%
+					</td>
+
+					<td>
+						{{game.review.score}}
+					</td>
+
+					<td class="content_item_developer">
+						{{game.developer}}
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

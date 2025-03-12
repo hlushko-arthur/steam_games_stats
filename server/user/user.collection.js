@@ -28,6 +28,22 @@ const userSchema = new mongoose.Schema({
 		name: String,
 		playtime: Number,
 		lastPlayed: Number,
+		recentPlaytime: Number,
+		developer: String,
+		publisher: String,
+		releaseDate: String,
+		price: {
+			currency: String,
+			value: Number,
+			formatted: String,
+		},
+		genres: [String],
+		review: {
+			totalPositive: Number,
+			totalNegative: Number,
+			score: Number,
+			rating: Number
+		}
 	}]
 
 })

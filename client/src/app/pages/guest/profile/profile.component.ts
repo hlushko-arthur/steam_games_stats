@@ -1,8 +1,6 @@
-import { KeyValue } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { CoreModule } from "src/app/core/core.module";
-import { StatsChart } from "src/app/core/interfaces/stats.interface";
 import { Game } from "src/app/core/interfaces/steam.interface";
 import { User } from "src/app/core/interfaces/steam.interface";
 import { FileService } from "src/app/services/file.service";
@@ -15,7 +13,7 @@ import { GameService } from "src/app/services/game.service";
 	templateUrl: './profile.component.html',
 	styleUrls: ['./profile.component.scss'],
 	standalone: true,
-	imports: [CoreModule, ChartComponent]
+	imports: [CoreModule, ChartComponent, RouterLink]
 })
 
 export class ProfileComponent implements OnInit {
@@ -56,23 +54,11 @@ export class ProfileComponent implements OnInit {
 	private async _loadUserData(): Promise<void> {
 		const { games, user } = await this._us.fetchProfile(this.steamId);
 
-		this._sortGames(games);
-
 		this.gs.setGames(games);
 
 		this.stats.calculateStats(games);
 
 		this.games = games;
 		this.user = user;
-	}
-
-	private _sortGames(games: Game[]): void {
-		games = games.sort((a, b) => {
-			if (a.lastPlayed < b.lastPlayed) {
-				return 1;
-			}
-
-			return -1;
-		})
 	}
 }

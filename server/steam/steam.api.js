@@ -26,7 +26,7 @@ router.get('/fetch_profile',
 				steamId: steamId
 			}))?.ACCESS_TOKEN || '';
 
-			let games = await getUserGames(steamId, accessToken);
+			let games = await getUserGames(steamId, accessToken)
 
 			if (!games) {
 				return;
@@ -36,6 +36,19 @@ router.get('/fetch_profile',
 				const gameAchievements = await getGameAchievements(game.appid, steamId);
 
 				game.achievements = gameAchievements;
+
+				const gameDetails = await getGameDetails(game.appid);
+
+				const gameReview = await getGameReviews(game.appid);
+
+				game.review = gameReview;
+
+				game.publisher = gameDetails.publisher;
+				game.developer = gameDetails.developer;
+				game.genres = gameDetails.genres;
+				game.price = gameDetails.price;
+				game.releaseDate = gameDetails.releaseDate;
+
 			}))
 
 			games = games.map((game) => {
@@ -46,7 +59,13 @@ router.get('/fetch_profile',
 					name: game.name,
 					lastPlayed: game.rtime_last_played,
 					achievements: game.achievements,
-					userAchievements: game.userAchievements
+					recentPlaytime: game.playtime_2weeks || 0,
+					developer: game.developer,
+					publisher: game.publisher,
+					price: game.price,
+					genres: game.genres,
+					review: game.review,
+					releaseDate: game.releaseDate
 				}
 			})
 
@@ -206,6 +225,55 @@ async function getAchievementPercentageForGame(appId) {
 	}
 }
 
+async function getGameDetails(appId) {
+	try {
+		const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=US&l=en&filters=developers,publishers,price_overview,release_date,genres`;
+
+		const response = await axios.get(url);
+
+		if (!response.data[appId].success) {
+			return {};
+		}
+
+		let data = response.data[appId].data;
+
+		data = {
+			developer: data.developers[0],
+			publisher: data.publishers[0],
+			price: {
+				currency: data.price_overview?.currency || 'USD',
+				value: data.price_overview?.final ?? 0,
+				formatted: data.price_overview?.final_formatted || '$0'
+			},
+			genres: (data.genres || []).map((genre) => genre.description),
+			releaseDate: data.release_date.date
+		}
+
+		return data;
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getGameReviews(appId) {
+	try {
+		const url = `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&num_per_page=0&purchase_type=all`;
+
+		const response = await axios.get(url);
+
+		const data = {
+			totalPositive: response.data.query_summary.total_positive,
+			totalNegative: response.data.query_summary.total_negative,
+			score: response.data.query_summary.review_score,
+			rating: Number((response.data.query_summary.total_positive / (response.data.query_summary.total_positive + response.data.query_summary.total_negative) * 100).toFixed(2)) || 0
+		}
+
+		return data;
+	} catch (error) {
+		throw error;
+	}
+}
+
 async function getSteamId(username) {
 	const url = `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?key=${API_KEY}&vanityurl=${username}`
 	const response = await fetch(url);
@@ -219,6 +287,7 @@ function _clearResponse(data) {
 	const _data = JSON.parse(JSON.stringify(data));
 
 	delete _data.ACCESS_TOKEN;
+	delete _data.REFRESH_TOKEN;
 
 	return _data;
 }

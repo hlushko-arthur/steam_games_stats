@@ -1,9 +1,9 @@
-// @ts-check
+
 const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
 
-module.exports = tseslint.config(
+export default tseslint.config(
 	{
 		files: ["**/*.ts"],
 		extends: [
@@ -18,7 +18,7 @@ module.exports = tseslint.config(
 				"error",
 				{
 					type: "attribute",
-					prefix: "app",
+					prefix: "",
 					style: "camelCase",
 				},
 			],
@@ -37,7 +37,7 @@ module.exports = tseslint.config(
 				selector: "variable",
 				format: ["camelCase", "UPPER_CASE"],
 				leadingUnderscore: "allow",
-			}],
+			}]
 		},
 	},
 	{

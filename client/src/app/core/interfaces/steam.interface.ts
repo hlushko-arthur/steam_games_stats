@@ -27,8 +27,24 @@ export interface Game {
 	name: string;
 	playtime: number;
 	lastPlayed: number;
+	recentPlaytime: number;
 	achievementsUnlocked: number;
 	isPerfect?: boolean;
+	releaseDate: string;
+	genres: string[];
+	price: {
+		currency: string;
+		value: number;
+		formatted: string;
+	},
+	developer: string;
+	publisher: string;
+	review: {
+		totalPositive: number;
+		totalNegative: number;
+		score: number;
+		rating: number;
+	}
 }
 
 export interface User {
