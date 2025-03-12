@@ -22,6 +22,7 @@ export class GamesComponent implements OnInit {
 
 		if (!steamId) {
 			this._router.navigateByUrl('/');
+
 			return;
 		}
 

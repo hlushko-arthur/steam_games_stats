@@ -20,8 +20,7 @@
 			</thead>
 
 			<tbody>
-				<tr class="content_item" [class.perfect]="game.isPerfect"
-					*ngFor="let game of games">
+				<tr class="content_item" [class.perfect]="game.isPerfect" *ngFor="let game of games">
 					<td class="content_item_title">
 						<div class="content_item_title_img">
 							<img [src]="fs.gameHeader(game._id)" alt="">
