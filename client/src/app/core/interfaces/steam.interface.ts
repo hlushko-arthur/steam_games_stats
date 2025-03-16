@@ -20,6 +20,7 @@ export type Achievement = BaseAchievement & ({
 // 	achieved: boolean;
 // 	unlockTime?: number;
 // }
+ 
 export interface Game {
 	achievements: Achievement[];
 	_id: number;

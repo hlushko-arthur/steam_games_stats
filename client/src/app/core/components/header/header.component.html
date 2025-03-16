@@ -4,20 +4,23 @@
 	</div>
 
 	<nav class="header_nav">
-		<div class="header_nav_item active">
+		<div [routerLink]="'/profile/' + us.user.steamId" class="header_nav_item active">
 			Profile
 		</div>
 
-		<div class="header_nav_item">
+		<div routerLink="/games" class="header_nav_item">
 			Games
 		</div>
 
-		<div class="header_nav_item">
+		<div routerLink="/achievements" class="header_nav_item">
 			Achievements
 		</div>
 	</nav>
 
-	<div class="profile">
+	<div class="header_profile">
 		{{us.user.name}}
+		<div class="header_profile_avatar">
+			<img [src]="fs.avatar(us.user.avatar, 'medium')">
+		</div>
 	</div>
 </div>

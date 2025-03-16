@@ -8,8 +8,6 @@ import { Game } from "../core/interfaces/steam.interface";
 export class GameService {
 	games: Record<number, Game> = {};
 
-	constructor() { }
-
 	setGames(games: Game[]): void {
 		games = structuredClone(games);
 

@@ -8,7 +8,7 @@ import { TimeFormatPipe } from "./pipes/time-format.pipe";
 	declarations: [
 		InputComponent,
 		DateFormatPipe,
-		TimeFormatPipe
+		TimeFormatPipe,
 	],
 	imports: [
 		CommonModule,
@@ -17,7 +17,7 @@ import { TimeFormatPipe } from "./pipes/time-format.pipe";
 		InputComponent,
 		CommonModule,
 		DateFormatPipe,
-		TimeFormatPipe
+		TimeFormatPipe,
 	]
 })
 

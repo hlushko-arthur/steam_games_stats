@@ -37,6 +37,7 @@ export class ProfileComponent implements OnInit {
 
 		if (!steamId) {
 			this._router.navigateByUrl('/');
+
 			return;
 		}
 
@@ -52,13 +53,20 @@ export class ProfileComponent implements OnInit {
 	}
 
 	private async _loadUserData(): Promise<void> {
+		if (Object.keys(this._us.userData).length) {
+			this.games = this._us.userData.games;
+
+			this.user = this._us.userData.user;
+
+			return;
+		}
+
 		const { games, user } = await this._us.fetchProfile(this.steamId);
 
 		this.gs.setGames(games);
 
 		this.stats.calculateStats(games);
 
-		this.games = games;
-		this.user = user;
+		Object.assign(this, { games, user });
 	}
 }

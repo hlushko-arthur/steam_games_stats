@@ -1,4 +1,5 @@
-<div class="container">
-	<div *ngIf="title" class="title">{{title}}</div>
-	<input type="text" placeholder="placeholder">
+<div *ngIf="title" class="title">{{title}}</div>
+<div class="input-container">
+	<input type="text" [placeholder]="placeholder">
+	<img src="/assets/icons/search.png">
 </div>

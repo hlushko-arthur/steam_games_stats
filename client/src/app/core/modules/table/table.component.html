@@ -1,0 +1,16 @@
+<div class="content">
+	<table>
+		<thead>
+			<tr>
+				<th (click)="sortGames(title.sort)" *ngFor="let title of header">
+					{{title.name}}
+					<span *ngIf="sort.by() === title.sort" class="caret" [class.rotate]="!sort.descending"></span>
+				</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			<ng-template [ngTemplateOutlet]="bodyList"></ng-template>
+		</tbody>
+	</table>
+</div>

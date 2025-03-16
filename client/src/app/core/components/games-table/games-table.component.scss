@@ -1,0 +1,213 @@
+table {
+	width: 100%;
+	border-collapse: collapse;
+
+	thead {
+		height: 30px;
+
+		th {
+			white-space: nowrap;
+			cursor: pointer;
+
+			&:hover {
+				text-shadow: 1px 1px 4px var(--c-text);
+			}
+
+			.caret {
+				display: inline-block;
+				width: 0;
+				height: 0;
+				margin-left: 2px;
+				vertical-align: middle;
+				border-top: 4px dashed;
+				border-top: 4px solid\9;
+				border-right: 4px solid transparent;
+				border-left: 4px solid transparent;
+				transition: transform 0.1s;
+
+				&.rotate {
+					transform: rotate(180deg);
+				}
+			}
+		}
+	}
+
+	tbody {
+		td:not(:nth-child(1)) {
+			text-align: center;
+		}
+	}
+}
+
+.table-item {
+	border-top: 1px solid var(--c-light-grey);
+	background-color: var(--c-light-grey05);
+	height: 60px;
+	box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
+
+	&_title {
+		max-width: 300px;
+		display: flex;
+		align-items: center;
+		height: 100%;
+
+		&_img {
+			margin-right: 6px;
+
+			img {
+				border: 2px solid #171d21;
+				border-radius: 5px;
+				width: 120px;
+				height: 45px;
+				object-fit: cover;
+				position: relative;
+				z-index: 1;
+			}
+		}
+	}
+
+	&_achievements {
+		img {
+			width: 16px;
+			height: 16px;
+		}
+	}
+
+	&_completion {
+		padding: 0 6px;
+
+		.progress-bar {
+			width: 120px;
+			height: 6px;
+			background: linear-gradient(to right, #1e2a38, #2a3b4f);
+			border-radius: 8px;
+			overflow: hidden;
+			box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
+			position: relative;
+			margin: auto;
+		}
+
+		.progress-fill {
+			height: 100%;
+			width: 0%;
+			background: var(--c-green);
+			border-radius: 8px;
+			transition: width 0.5s ease-in-out;
+
+			&.perfect {
+				background: var(--c-gold);
+			}
+		}
+
+	}
+
+	&_developer {
+		max-width: 200px;
+	}
+
+	&.perfect {
+		color: var(--c-gold);
+		position: relative;
+		text-shadow: 1px 1px 4px var(--c-orange);
+
+		.games_item_title_img img {
+			border: 2px solid var(--c-gold);
+			box-shadow: 1px 1px 4px var(--c-gold);
+		}
+	}
+
+	&.perfect::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: var(--c-gold);
+		opacity: 0.1;
+		z-index: 0;
+	}
+}
+
+.cards {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+
+	.game {
+		margin-bottom: 12px;
+		// margin-left: 32px;
+		padding: 6px;
+		width: 400px;
+		background-color: var(--c-light-grey05);
+		border-radius: 12px;
+		height: 154px;
+		box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
+		display: grid;
+
+		&_header {
+			img {
+				border: 3px solid #171d21;
+				border-radius: 5px;
+				width: 120px;
+				height: 45px;
+				object-fit: cover;
+			}
+		}
+
+		&_achievements {
+			display: flex;
+
+			&_item {
+				img {
+					width: 36px;
+					height: 36px;
+					border: 1px solid black;
+					border-radius: 5px;
+				}
+
+				&:not(:last-child) {
+					margin-right: 2px;
+				}
+			}
+		}
+
+		&_footer {
+			background-color: var(--c-dark-grey);
+			border-radius: 0 0 12px 12px;
+			display: flex;
+			height: 45px;
+			justify-content: space-between;
+			padding: 6px;
+			box-sizing: border-box;
+			margin-bottom: -8px;
+
+			&_item {
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				flex-direction: column;
+
+				div:nth-child(1) {
+					display: flex;
+					align-items: center;
+
+					img {
+						margin-right: 6px;
+					}
+				}
+
+				&:not(:last-child) {
+					border-right: 1px solid var(--c-light-grey);
+				}
+			}
+		}
+
+		&:not(:last-child) {
+			margin-right: 12px;
+		}
+	}
+}

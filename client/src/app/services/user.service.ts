@@ -1,4 +1,4 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpService } from "./http.service";
 import { Game, User, UserProfile } from "../core/interfaces/steam.interface";
 import { StoreService } from "./store.service";
@@ -15,10 +15,7 @@ export class UserService {
 	constructor(private _http: HttpService, private _store: StoreService) {
 		const user = this._store.getJson<User>('user');
 
-		console.log(user);
-
-
-		if(user) {
+		if (user) {
 			this.user = user;
 		}
 	}
@@ -29,8 +26,6 @@ export class UserService {
 		this._configureProfile(userData.games);
 
 		this.userData = userData;
-
-		this._store.setJson('user', userData.user);
 
 		this.user = userData.user;
 
@@ -50,12 +45,12 @@ export class UserService {
 	}
 
 	private _sortGames(games: Game[]): void {
-		games = games.sort((a, b) => {
+		games.sort((a, b) => {
 			if (a.lastPlayed < b.lastPlayed) {
 				return 1;
 			}
 
 			return -1;
-		})
+		});
 	}
 }
