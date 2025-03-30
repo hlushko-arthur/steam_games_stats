@@ -1,0 +1,213 @@
+.container {
+	overflow: hidden;
+}
+
+.content {
+	padding: 24px;
+	display: flex;
+	height: 100%;
+	box-sizing: border-box;
+
+	&_left {
+		box-sizing: border-box;
+		height: 100%;
+	}
+
+	&_right {
+		box-sizing: border-box;
+		height: 100%;
+		margin-left: 24px;
+		width: 100%;
+	}
+}
+
+.game-profile {
+	box-sizing: border-box;
+	padding: 6px;
+	width: 400px;
+	background-color: var(--c-light-grey05);
+	border-radius: 6px;
+	height: 154px;
+	display: grid;
+	box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
+
+	&_title {
+		display: flex;
+		width: 100%;
+
+		&_img {
+			margin-right: 6px;
+
+			img {
+				border: 3px solid #171d21;
+				border-radius: 6px;
+				width: 120px;
+				height: 45px;
+				object-fit: cover;
+			}
+		}
+
+		&_description {
+			text-align: center;
+		}
+	}
+
+	&_achievements {
+		display: flex;
+		justify-content: center;
+
+		&_item {
+			img {
+				width: 36px;
+				height: 36px;
+				border-radius: 6px;
+			}
+
+			&:not(:last-child) {
+				margin-right: 3px;
+			}
+		}
+	}
+
+	&_bottom {
+		padding: 6px;
+		display: flex;
+		justify-content: space-around;
+		background-color: var(--c-dark-grey);
+		border-radius: 0 0 6px 6px;
+
+		&_item {
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+
+			&_title {
+				display: flex;
+				align-items: center;
+
+				img {
+					margin-right: 6px;
+				}
+			}
+		}
+
+		&_item:not(:last-child) {
+			border-right: 1px solid var(--c-light-grey);
+		}
+	}
+}
+
+.game-description {
+	box-sizing: border-box;
+	margin-top: 24px;
+	padding: 6px;
+	width: 400px;
+	background-color: var(--c-light-grey05);
+	border-radius: 6px;
+	box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
+
+	&_item {
+		display: flex;
+		margin: 3px 0;
+
+		span:nth-child(1) {
+			display: inline-block;
+			width: 50%;
+			text-align: right;
+			margin-right: 16px;
+			color: var(--c-text-desc);
+		}
+	}
+
+	&_line {
+		margin: 6px 0;
+		width: 100%;
+		height: 0px;
+		border: 1px dashed var(--c-grey);
+	}
+}
+
+.table-players {
+	box-sizing: border-box;
+	width: 100%;
+
+	&_name {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		img {
+			border: 4px double black;
+			border-radius: 6px;
+			width: 32px;
+			height: 32px;
+		}
+	}
+}
+
+.table-achievements {
+	&_display-name {
+		display: flex;
+		align-items: center;
+
+		&_title {
+			margin-left: 16px;
+
+			div {
+				text-align: left;
+
+				&:last-child {
+					color: var(--c-text-desc);
+				}
+			}
+		}
+
+		img {
+			width: 36px;
+			height: 36px;
+
+			&:first-child,
+			&:last-child {
+				border: 1px solid black;
+				border-radius: 6px;
+			}
+		}
+
+		.arrow {
+			width: 12px;
+			height: 12px;
+			margin: 0 6px;
+		}
+
+		&.achieved {
+			img:nth-child(3) {
+				box-shadow: 0px 0px 4px var(--c-green);
+			}
+
+			div {
+				&:first-child {
+					color: var(--c-green);
+					text-shadow: 0px 0px 4px var(--c-dark-green);
+				}
+
+				&:last-child {
+					color: var(--c-text);
+				}
+			}
+		}
+	}
+
+	&_unlock-time {
+		&.achieved {
+			color: var(--c-green);
+		}
+	}
+
+	&_rarity {
+		&.achieved {
+			color: var(--c-green);
+		}
+	}
+}

@@ -1,21 +1,17 @@
-import { Directive, TemplateRef } from '@angular/core';
+import { Directive, Input, TemplateRef } from '@angular/core';
 
 @Directive({
-	selector: 'ng-template[w-table-body-list]',
+	selector: 'ng-template[w-table-body]'
 })
-export class TableBodyListDirective {
-	constructor(public template: TemplateRef<unknown>) {
-		console.log(template);
-		
-	}
+export class TableBodyDirective {
+	constructor(public template: TemplateRef<unknown>) {}
 }
 
 @Directive({
-	selector: 'ng-template[w-table-body-cards]',
+	selector: 'ng-template[w-table-custom]'
 })
-export class TableBodyCardsDirective {
-	constructor(public template: TemplateRef<unknown>) {
-		console.log(template);
-		
-	}
+export class CustomTdDirective {
+	@Input() 'w-table-custom': any;
+
+	constructor(public template: TemplateRef<unknown>) {}
 }

@@ -21,36 +21,22 @@ export class UserService {
 	}
 
 	async fetchProfile(steamId: string): Promise<UserProfile> {
-		const userData = await this._http.get<UserProfile>(`/steam/fetch_profile?steamID=${steamId}`);
+		const response = await this._http.get<UserProfile>(`/user/fetch_profile?steamID=${steamId}`);
 
-		this._configureProfile(userData.games);
+		this._configureProfile(response.data.games);
 
-		this.userData = userData;
+		this.userData = response.data;
 
-		this.user = userData.user;
+		this.user = this.userData.user;
 
-		return userData;
+		return this.userData;
 	}
 
 	private _configureProfile(games: Game[]): void {
 		for (const game of games) {
-			game.achievementsUnlocked = game.achievements.filter((achievement) => achievement.achieved).length;
-
 			if (game.achievements.length) {
 				game.isPerfect = game.achievements.length === game.achievementsUnlocked;
 			}
 		}
-
-		this._sortGames(games);
-	}
-
-	private _sortGames(games: Game[]): void {
-		games.sort((a, b) => {
-			if (a.lastPlayed < b.lastPlayed) {
-				return 1;
-			}
-
-			return -1;
-		});
 	}
 }

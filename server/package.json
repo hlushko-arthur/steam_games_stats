@@ -3,10 +3,13 @@
   "dependencies": {
     "@passport-next/passport-openid": "^1.0.0",
     "axios": "^1.8.1",
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "howlongtobeat": "^1.8.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.11.0",
     "node-fetch": "^3.3.2",
     "passport": "^0.7.0",

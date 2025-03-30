@@ -48,10 +48,6 @@ export class ProfileComponent implements OnInit {
 		this._loadUserData();
 	}
 
-	getCompletionNumber(game: Game): number {
-		return Math.floor(game.achievementsUnlocked / game.achievements.length * 100);
-	}
-
 	private async _loadUserData(): Promise<void> {
 		if (Object.keys(this._us.userData).length) {
 			this.games = this._us.userData.games;

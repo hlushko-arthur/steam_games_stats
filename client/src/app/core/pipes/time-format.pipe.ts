@@ -12,16 +12,16 @@ export class TimeFormatPipe implements PipeTransform {
 
 		const h = Math.floor(time / 60);
 
-		const m = time % 60;
+		const m = Math.floor(time % 60);
 
-		let _time = '';
+		let result = '';
 
 		if (h) {
-			_time = `${h}h ${m}m`;
+			result = `${h}h ${m}m`;
 		} else {
-			_time = `${m}m`
+			result = `${m}m`;
 		}
 
-		return _time;
+		return result;
 	}
 }

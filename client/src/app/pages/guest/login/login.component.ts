@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { HttpService } from "src/app/services/http.service";
 import { SocketService } from "src/app/services/socket.service";
-import { SteamAuthService } from "src/app/services/steam-auth.service";
+import { SteamAuthService } from "src/app/services/auth.service";
 
 @Component({
 	templateUrl: './login.component.html',
@@ -11,20 +11,21 @@ import { SteamAuthService } from "src/app/services/steam-auth.service";
 
 export class LoginComponent implements OnInit {
 
-	isPasswordVisible: boolean = false;
+	isPasswordVisible = false;
 
-	constructor(private _http: HttpService, private _socket: SocketService, private _steamAuth: SteamAuthService) { }
+	constructor(private _http: HttpService, private _socket: SocketService, private _auth: SteamAuthService) { }
 
 	ngOnInit(): void {
-		this._steamAuth.startQRAuth();
+		this._auth.startQRAuth();
 	}
 
 	async loginManually(): Promise<void> {
 		this._socket.on('qrCode', (resp: any) => {
 			console.log(resp);
 
-		})
-		this._http.get('/api/steam/auth/qr')
+		});
+
+		this._http.get('/api/steam/auth/qr');
 	}
 
 	changePasswordVisibility(): void {
@@ -32,7 +33,7 @@ export class LoginComponent implements OnInit {
 	}
 
 	get qrCode(): string {
-		return this._steamAuth.qrUrl();
+		return this._auth.qrUrl();
 	}
 
 }

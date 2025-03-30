@@ -1,0 +1,200 @@
+<div *ngIf="game" class="container" [style.background-image]="'url(' + fs.gameBackgroundV6(game._id) + ')'">
+	<div class="content">
+		<div class="content_left">
+			<div class="game-profile">
+				<div class="game-profile_title">
+					<div class="game-profile_title_img">
+						<img [src]="fs.gameHeader(game._id)">
+					</div>
+					<div class="game-profile_title_description">
+						{{game.name}}
+					</div>
+				</div>
+
+				<div class="game-profile_achievements">
+					<div class="game-profile_achievements_item"
+						*ngFor="let achievement of game.achievements | slice:0:10">
+						<img [src]="fs.file(game._id, achievement.icon)">
+					</div>
+				</div>
+
+				<div class="game-profile_bottom">
+					<div class="game-profile_bottom_item">
+						<div class="game-profile_bottom_item_title">
+							<img src="/assets/icons/clock.png">
+							{{game.playtime | timeFormat}}
+						</div>
+
+						<div class="desc">
+							Playtime
+						</div>
+					</div>
+					<div class="game-profile_bottom_item">
+						<div class="game-profile_bottom_item_title">
+							<img src="/assets/icons/trophy-grey.png">
+							{{game.achievementsUnlocked}}/{{game.achievements.length}}
+						</div>
+
+						<div class="desc">
+							Achievements
+						</div>
+					</div>
+					<div class="game-profile_bottom_item">
+						<div class="game-profile_bottom_item_title">
+							<img src="/assets/icons/games.png">
+							{{game.completion}}%
+						</div>
+
+						<div class="desc">
+							Completion
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="game-description">
+					<div class="game-description_item">
+						<span>Developer</span>
+						<span>{{game.developer}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Publisher</span>
+						<span>{{game.publisher}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Genre</span>
+						<span *ngFor="let genre of game.genres; index as i">{{genre}}{{i === (game.genres.length - 1) ? '' : ', '}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Categories</span>
+						<span>{{game.developer}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Release</span>
+						<span>{{game.releaseDate}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Price</span>
+						<span>{{game.price.formatted}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Game Rating</span>
+						<span>{{game.review.rating}}%</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Steam Review Score</span>
+						<span>{{game.review.score}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Metacritic Score</span>
+						<span>{{game.metacritic?.score || '-'}}</span>
+					</div>
+
+					<div class="game-description_item">
+						<span>Playtime</span>
+						<span>{{game.playtime | timeFormat}}</span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Achievements</span>
+						<span>{{game.achievements.length}}</span>
+					</div>
+	
+					<div class="game-description_line"></div>
+	
+					<div class="game-description_item">
+						<span>First Unlock Date</span>
+						<span>{{firstUnlockDate | dateFormat: 'MMM DD YYYY, HH:mm'}}</span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Last Unlock Date</span>
+						<span>{{lastUnlockDate | dateFormat: 'MMM DD YYYY, HH:mm'}}</span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Time between</span>
+						<span>{{timeBetween | timeFormat}}</span>
+					</div>
+	
+					<div class="game-description_line"></div>
+	
+					<div class="game-description_item">
+						<span>Owners</span>
+						<span></span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Players</span>
+						<span></span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>In Progress</span>
+						<span></span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Completed</span>
+						<span></span>
+					</div>
+	
+					<div class="game-description_line"></div>
+	
+					<div class="game-description_item">
+						<span>Playtime Average</span>
+						<span></span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Playtime Median</span>
+						<span></span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Completion Average</span>
+						<span></span>
+					</div>
+	
+					<div class="game-description_item">
+						<span>Completion Median</span>
+						<span></span>
+					</div>
+			</div>
+		</div>
+
+		<div class="content_right">
+			<wTable class="table-achievements" height="666" [headers]="TABLE_ACHIEVEMENTS_HEADER" [items]="game.achievements">
+				<ng-template w-table-custom="displayName" let-achievement>
+					<div [class.achieved]="achievement.achieved" class="table-achievements_display-name">
+						<img [src]="fs.file(game._id, achievement.iconGray)">
+						<img class="arrow" src="/assets/icons/arrow-right.png">
+						<img [src]="fs.file(game._id, achievement.icon)">
+						<div class="table-achievements_display-name_title">
+							<div>{{achievement.displayName}}</div>
+							<div>{{achievement.description}}</div>
+						</div>
+					</div>
+				</ng-template>
+
+				<ng-template w-table-custom="unlockTime" let-achievement>
+					<span [class.achieved]="achievement.achieved" class="table-achievements_unlock-time">
+						{{achievement.unlockTime | dateFormat: 'MMM DD YYYY, HH:mm'}}
+					</span>
+				</ng-template>
+
+				<ng-template w-table-custom="rarity" let-achievement>
+					<span [class.achieved]="achievement.achieved" class="table-achievements_rarity">{{achievement.rarity}}%</span>
+				</ng-template>
+			</wTable>
+		</div>
+	</div>
+</div>

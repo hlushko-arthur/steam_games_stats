@@ -22,15 +22,7 @@ async function qrCodeAuth() {
 	});
 
 	session.on('authenticated', async () => {
-		// console.log('\nAuthenticated successfully! Printing your tokens now...');
-		// console.log(`SteamID: ${session.steamID}`);
-		// console.log(`Account name: ${session.accountName}`);
-		// console.log(`Access token: ${session.accessToken}`);
-		// console.log(`Refresh token: ${session.refreshToken}`);
-
-		// let webCookies = await session.getWebCookies();
-		// console.log('Web session cookies:');
-		// console.log(webCookies);
+		console.log(session.steamID);
 
 		let user = await User.findOne({
 			steamId: session.steamID
@@ -40,7 +32,7 @@ async function qrCodeAuth() {
 			user = new User({
 				steamId: session.steamID,
 				ACCESS_TOKEN: session.accessToken,
-				REFRESH_TOKEN: session.refreshToken
+				REFRESH_TOKEN: session.refreshToken,
 			})
 
 			await user.save();
@@ -49,7 +41,7 @@ async function qrCodeAuth() {
 				steamId: session.steamID
 			}, {
 				ACCESS_TOKEN: session.accessToken,
-				REFRESH_TOKEN: session.refreshToken
+				REFRESH_TOKEN: session.refreshToken,
 			})
 
 			user = await User.findOne({
@@ -57,15 +49,9 @@ async function qrCodeAuth() {
 			})
 		}
 
-		const _user = JSON.parse(JSON.stringify(user));
-
-		delete _user.ACCESS_TOKEN;
-
-		delete _user.ACCESS_TOKEN;
-
 		io.emit('authenticated', {
 			method: 'qr',
-			user: _user
+			steamId: session.steamID
 		})
 	});
 

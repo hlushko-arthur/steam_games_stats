@@ -33,6 +33,7 @@ export interface Game {
 	isPerfect?: boolean;
 	releaseDate: string;
 	genres: string[];
+	completion: number;
 	price: {
 		currency: string;
 		value: number;
@@ -45,6 +46,10 @@ export interface Game {
 		totalNegative: number;
 		score: number;
 		rating: number;
+	},
+	metacritic?: {
+		score: number;
+		url: string;
 	}
 }
 

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { GamesTableComponent } from "src/app/core/components/games-table/games-table.component";
 import { CoreModule } from "src/app/core/core.module";
 import { Game } from "src/app/core/interfaces/steam.interface";
-import { TableViewMode } from "src/app/core/interfaces/table.interface";
+import { TableViewMode } from "src/app/core/modules/table/table.interface";
 import { SortPipe } from "src/app/core/pipes/sort.pipe";
 import { UserService } from "src/app/services/user.service";
 
@@ -15,7 +15,7 @@ import { UserService } from "src/app/services/user.service";
 })
 
 export class GamesComponent implements OnInit {	
-	viewMode: TableViewMode = 'cards';
+	viewMode: TableViewMode = 'list';
 
 	games: Game[] = [];
 

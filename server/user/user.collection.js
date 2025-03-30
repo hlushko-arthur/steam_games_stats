@@ -19,10 +19,13 @@ const userSchema = new mongoose.Schema({
 			iconGray: String,
 			name: String,
 			description: String,
-			unlockTime: String,
+			unlockTime: Number,
 			achieved: Boolean,
 			rarity: Number
 		}],
+		achievementsUnlocked: Number,
+		completion: Number,
+		isPerfect: Boolean,
 		_id: Number,
 		icon: String,
 		name: String,
@@ -43,6 +46,10 @@ const userSchema = new mongoose.Schema({
 			totalNegative: Number,
 			score: Number,
 			rating: Number
+		},
+		metacritic: {
+			score: Number,
+			url: String
 		}
 	}]
 

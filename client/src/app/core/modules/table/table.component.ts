@@ -1,6 +1,6 @@
-import { Component, ContentChild, Input, signal, TemplateRef } from "@angular/core";
-import { TableHeader, ViewMode } from "../../interfaces/table.interface";
-import { TableBodyCardsDirective, TableBodyListDirective } from "./table-directives";
+import { AfterContentInit, Component, ContentChild, ContentChildren, Input, OnChanges, QueryList, signal, SimpleChanges, TemplateRef } from "@angular/core";
+import { TableHeaders } from "./table.interface";
+import { CustomTdDirective, TableBodyDirective } from "./table-directives";
 
 @Component({
 	selector: 'wTable',
@@ -8,28 +8,45 @@ import { TableBodyCardsDirective, TableBodyListDirective } from "./table-directi
 	styleUrl: './table.component.scss',
 })
 
-export class TableComponent {
-	@ContentChild(TableBodyListDirective, { read: TemplateRef }) bodyList!: TemplateRef<unknown>;
+export class TableComponent implements AfterContentInit, OnChanges {
+	@ContentChild(TableBodyDirective, { read: TemplateRef }) bodyList!: TemplateRef<unknown>;
 
-	@ContentChild(TableBodyCardsDirective, { read: TemplateRef }) bodyCards!: TemplateRef<unknown>;
+	@ContentChildren(CustomTdDirective) customTds!: QueryList<CustomTdDirective>;
 
-	@Input() header!: TableHeader[];
+	@Input() headers!: TableHeaders;
 
-	@Input() viewMode: ViewMode = 'list';
+	@Input() items: any = [];
+
+	@Input() height: string | number = '100%';
+
+	customComponents: Record<string, TemplateRef<unknown>> = {};
 
 	sort = {
-		by: signal('lastPlayed'),
+		by: signal(''),
 		descending: true
 	};
 
-	constructor() {
-		setTimeout(() => {
-			console.log(this.bodyList);
-			
-		}, 1000);
+	ngAfterContentInit(): void {
+		for (const header of this.headers) {
+			if (header.default) {
+				this.sort.by.set(header.sortKey);
+
+				break;
+			}
+		}
+
+		for (const component of this.customTds) {
+			this.customComponents[component['w-table-custom']] = component.template;
+		}		
 	}
 
-	sortGames(key: string): void {
+	ngOnChanges(changes: SimpleChanges): void {
+		if (changes['items'].currentValue) {
+			this.items = changes['items'].currentValue;
+		}
+	}
+
+	sortTable(key: string): void {
 		this.sort.by.update((value) => {
 			if (value === key) {
 				this.sort.descending = !this.sort.descending;
@@ -39,5 +56,13 @@ export class TableComponent {
 
 			return key;
 		});
+	}
+	
+	getTableHeight(): string {
+		if (typeof this.height === 'number' || !Number.isNaN(Number(this.height))) {
+			return `${this.height}px`;
+		}
+
+		return this.height;
 	}
 }

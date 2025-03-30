@@ -3,7 +3,7 @@ import { Game } from "../../interfaces/steam.interface";
 import { FileService } from "src/app/services/file.service";
 import { CoreModule } from "../../core.module";
 import { SortPipe } from "../../pipes/sort.pipe";
-import { TableViewMode } from "../../interfaces/table.interface";
+import { TableViewMode } from "../../modules/table/table.interface";
 import { RouterLink } from "@angular/router";
 
 @Component({
@@ -25,11 +25,7 @@ export class GamesTableComponent {
 		by: signal('lastPlayed'),
 		descending: true
 	};
-
-	getCompletionNumber(game: Game): number {
-		return Math.floor(game.achievementsUnlocked / game.achievements.length * 100);
-	}
-
+	
 	sortGames(key: string): void {
 		this.sort.by.update((value) => {
 			if (value === key) {

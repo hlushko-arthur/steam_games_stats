@@ -1,12 +1,14 @@
 import express from "express";
 import mongoose from 'mongoose';
 import cors from "cors";
+import bodyParser from "body-parser";
 import 'dotenv/config';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
-import steamRoutes from "./steam/steam.api.js";
-import steamAuthRoutes from './steam/steam-auth.api.js';
+import userRoutes from "./user/user.api.js";
+import authRoutes from './user/auth.api.js';
+import gameRoutes from './game/game.api.js';
 
 const app = express();
 const PORT = 3000;
@@ -28,8 +30,10 @@ mongoose
     .catch((err) => console.error("MongoDB Connection Error", err));
 
 app.use(cors());
-app.use('/api/steam', steamRoutes);
-app.use('/api/steam/auth', steamAuthRoutes);
+app.use(bodyParser.json());
+app.use('/api/user', userRoutes);
+app.use('/api/user/auth', authRoutes);
+app.use('/api/game', gameRoutes);
 
 // const Users = {};
 

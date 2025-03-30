@@ -1,7 +1,9 @@
 export interface TableHeader {
-	name: string;
-
-	sort: string;
+	title: string;
+	sortKey: string;
+	default?: boolean;
 }
+
+export type TableHeaders = TableHeader[];
 
 export type TableViewMode = 'list' | 'cards' | 'grid' | 'mosaic';

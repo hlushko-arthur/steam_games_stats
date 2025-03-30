@@ -1,12 +1,13 @@
 import { NgModule } from "@angular/core";
-import { TableBodyCardsDirective, TableBodyListDirective } from "./table-directives";
-import { CoreModule } from "../../core.module";
+import { CustomTdDirective, TableBodyDirective } from "./table-directives";
 import { TableComponent } from "./table.component";
+import { CommonModule } from "@angular/common";
+import { SortPipe } from "../../pipes/sort.pipe";
 
 @NgModule({
-	declarations: [TableComponent, TableBodyListDirective, TableBodyCardsDirective],
-	imports: [CoreModule],
-	exports: [TableComponent, TableBodyListDirective, TableBodyCardsDirective]
+	declarations: [TableComponent, TableBodyDirective, CustomTdDirective],
+	imports: [CommonModule, SortPipe],
+	exports: [TableComponent, TableBodyDirective, CustomTdDirective]
 })
 
 export class TableModule {}

@@ -12,12 +12,12 @@ export class HttpService {
 
 	private readonly _prefix = '/api';
 
-	post(url: string, payload: any): Promise<any> {
+	post<T = unknown, D = Response<T>>(url: string, payload: Record<string, unknown>): Promise<D> {
 		// url = environment.serverUrl + url;
 		url = this._prefix + url;
 
 		return new Promise((resolve, reject) => {
-			this._httpClient.post<unknown>(url, payload).subscribe(
+			this._httpClient.post<D>(url, payload).subscribe(
 				(resp) => {
 					resolve(resp);
 				},
@@ -30,15 +30,15 @@ export class HttpService {
 		});
 	}
 
-	get<T = any>(url: string): Promise<T> {
+	get<T = unknown, TResponse = Response<T>>(url: string): Promise<TResponse> {
 		// url = environment.serverUrl + url;
 
 		url = this._prefix + url;
 
-		return new Promise<T>((resolve, reject) => {
-			this._httpClient.get<Response<T>>(url).subscribe(
+		return new Promise<TResponse>((resolve, reject) => {
+			this._httpClient.get<TResponse>(url).subscribe(
 				(resp) => {
-					resolve(resp.data);
+					resolve(resp);
 				},
 				(error: { error: { message: string } }) => {
 					this.checkTokenState(error);

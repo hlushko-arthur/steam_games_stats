@@ -24,8 +24,18 @@ body {
 }
 
 .container {
-	height: calc(100% - 60px);
+	height: 100%;
+	width: 100%;
 	overflow: auto;
+	background-size: cover;
+	background-position: top;
+	background-repeat: no-repeat;
+	position: absolute;
+	box-sizing: border-box;
+}
+
+.content {
+	z-index: 1;
 }
 
 h1,

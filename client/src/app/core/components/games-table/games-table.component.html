@@ -24,7 +24,7 @@
 			<td class="table-item_completion">
 				<div class="progress-bar">
 					<div class="progress-fill" [class.perfect]="game.isPerfect"
-						[style.width]="getCompletionNumber(game) + '%'">
+						[style.width]="game.completion + '%'">
 					</div>
 				</div>
 
@@ -114,7 +114,7 @@
 			<div class="game_footer_item">
 				<div>
 					<img src="/assets/icons/clock.png" alt="">
-					{{getCompletionNumber(game)}}%
+					{{game.completion}}%
 				</div>
 
 				<div class="desc">

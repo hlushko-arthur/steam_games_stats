@@ -1,16 +1,22 @@
-<div class="content">
+<div [style.height]="getTableHeight()" class="content">
 	<table>
 		<thead>
 			<tr>
-				<th (click)="sortGames(title.sort)" *ngFor="let title of header">
-					{{title.name}}
-					<span *ngIf="sort.by() === title.sort" class="caret" [class.rotate]="!sort.descending"></span>
+				<th (click)="sortTable(header.sortKey)" *ngFor="let header of headers">
+					{{header.title}}
+					<span *ngIf="sort.by() === header.sortKey" class="caret" [class.rotate]="!sort.descending"></span>
 				</th>
 			</tr>
 		</thead>
 
 		<tbody>
-			<ng-template [ngTemplateOutlet]="bodyList"></ng-template>
+			<tr class="table-row" *ngFor="let item of items | sort: sort.by() : sort.descending">
+				<td *ngFor="let header of headers">
+					<ng-template [ngTemplateOutlet]="customComponents[header.sortKey]" [ngTemplateOutletContext]="{$implicit: item}" *ngIf="customComponents[header.sortKey]; else noCustomTemplate"></ng-template>
+
+					<ng-template #noCustomTemplate>{{item[header.sortKey]}}</ng-template>
+				</td>
+			</tr>
 		</tbody>
 	</table>
 </div>

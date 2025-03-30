@@ -18,9 +18,15 @@
 	</nav>
 
 	<div class="header_profile">
-		{{us.user.name}}
-		<div class="header_profile_avatar">
-			<img [src]="fs.avatar(us.user.avatar, 'medium')">
-		</div>
+		<ng-container *ngIf="us.user.steamId; else signIn">
+			{{us.user.name}}
+			<div class="header_profile_avatar">
+				<img [src]="fs.avatar(us.user.avatar, 'medium')">
+			</div>
+		</ng-container>
+
+		<ng-template #signIn>
+			<div routerLink="/login">Sign In</div>
+		</ng-template>
 	</div>
 </div>

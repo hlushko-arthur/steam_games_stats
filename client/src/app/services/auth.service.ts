@@ -19,14 +19,11 @@ export class SteamAuthService {
 
 		this._socket.on('authenticated', (data: SAuthenticated) => {
 			console.log('authenticated', data);
-
-
-
 		});
 	}
 
 	async startQRAuth(): Promise<void> {
-		this._http.get('/steam/auth/qr');
+		this._http.get('/user/auth/qr');
 	}
 
 }

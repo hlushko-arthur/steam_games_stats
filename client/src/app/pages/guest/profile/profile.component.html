@@ -1,12 +1,4 @@
-<div class="container" *ngIf="games.length">
-	<div class="backdrop">
-		<!-- <video playsinline [autoplay]="true" [muted]="true" [loop]="true">
-			<source
-				src="https://cdn.fastly.steamstatic.com/steamcommunity/public/images/items/1091500/75b1a9153e13599d66d16853be815a6f1fffaeeb.webm"
-				type="video/webm">
-		</video> -->
-		<div class="image" [style.background-image]="'url(' + fs.gameBackgroundV6(games[0]._id) + ')'"></div>
-	</div>
+<div class="container" *ngIf="games.length" [style.background-image]="'url(' + fs.gameBackgroundV6(games[0]._id) + ')'">
 	<div *ngIf="user.steamId" class="content">
 		<div class="content_sidebar">
 			CO
@@ -98,7 +90,7 @@
 						<div class="last-game_bottom_item">
 							<div class="last-game_bottom_item_title">
 								<img src="/assets/icons/games.png">
-								{{getCompletionNumber(games[0])}}%
+								{{games[0].completion}}%
 							</div>
 
 							<div class="desc">
@@ -106,7 +98,6 @@
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</div>
 
@@ -191,7 +182,7 @@
 								<td class="games_item_completion">
 									<div class="progress-bar">
 										<div class="progress-fill" [class.perfect]="game.isPerfect"
-											[style.width]="getCompletionNumber(game) + '%'">
+											[style.width]="game.completion + '%'">
 										</div>
 									</div>
 
