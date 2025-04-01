@@ -36,6 +36,14 @@ export class GamesComponent implements OnInit {
 			return;
 		}
 
-		this.games = (await this._us.fetchProfile(steamId)).games;
+		const profile = await this._us.fetch({
+			steamId: steamId
+		});
+
+		if (!profile) {
+			return;
+		} 
+
+		this.games = profile.games;
 	}
 }

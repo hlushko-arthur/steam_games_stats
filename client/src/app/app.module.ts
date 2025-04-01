@@ -9,6 +9,7 @@ import { HeaderComponent } from './core/components/header/header.component';
 import { GamesComponent } from './pages/guest/games/games.component';
 import { GamesProfileComponent } from './pages/guest/games/games-profile/games-profile.component';
 import { DashboardComponent } from './pages/guest/dashboard/dashboard.component';
+import { GuestGuard } from './core/guards/guest.guard';
 
 const routes: Routes = [
 	{
@@ -25,7 +26,8 @@ const routes: Routes = [
 	},
 	{
 		path: 'login',
-		component: LoginComponent
+		component: LoginComponent,
+		canActivate: [GuestGuard]
 	},
 	{
 		path: 'dashobard',
@@ -41,7 +43,7 @@ const routes: Routes = [
 @NgModule({
 	declarations: [
 		AppComponent,
-		HeaderComponent,
+		HeaderComponent
 	],
 	imports: [
 		RouterLink,
@@ -52,7 +54,7 @@ const routes: Routes = [
 			preloadingStrategy: PreloadAllModules
 		})
 	],
-	providers: [provideHttpClient()],
+	providers: [provideHttpClient(), GuestGuard],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

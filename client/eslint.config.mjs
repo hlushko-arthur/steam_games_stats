@@ -39,6 +39,7 @@ export default tseslint.config([
 					"leadingUnderscore": "allow"
 				}
 			],
+			"@typescript-eslint/no-namespace": "off",
 			"@typescript-eslint/explicit-function-return-type": "error",
 			"@typescript-eslint/no-unused-vars": "error",
 			"keyword-spacing": ["error", { "before": true, "after": true }],

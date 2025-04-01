@@ -12,31 +12,31 @@ export class GameService {
 
 	constructor(private _http: HttpService) {}
 
-	setGames(games: Game[]): void {
-		games = structuredClone(games);
-
-		for (const game of games) {
-			this.games[game._id] = game;
-		}
-	}
-
 	game(appId: number): Game {
 		return this.games[appId];
 	}
 
-	async fetch(appId: number, steamId: string): Promise<Game> {
+	async fetch(appId: number, steamId: string): Promise<Game | null> {
 		const response = await this._http.post<Game>('/game/fetch', {
 			appId: appId,
 			steamId: steamId
 		});
 
+		if (!response.status) {
+			return null;
+		}
+
 		return response.data;
 	}
 
-	async getPlayersStats(appId: number): Promise<User[]> {
+	async getPlayersStats(appId: number): Promise<User[] | null> {
 		const response = await this._http.post<User[]>('/game/get_players_stats', {
 			appId: appId
 		});
+
+		if (!response.status) {
+			return null;
+		}
 
 		return response.data;
 	}

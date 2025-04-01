@@ -1,49 +1,100 @@
 <div class="container">
-	<div class="content">
-		<!-- <div class="content_item">
-			<div class="button" (click)="loginViaSteam()">
-				<img src="/assets/icons/steam.svg">
-				LOGIN WITH STEAM
-			</div>
-		</div>
-	
-		<div class="content_item">
-			<div class="button" (click)="loginManually()">
-				LOGIN MANUALLY TO STEAM
-			</div>
-			<span>To get extended information about your profile and games</span>
-		</div> -->
+	<div class="backdrop"></div>
 
-		<div class="content_header">
+	<div class="content">
+		<div *ngIf="!isDeviceConfirmationNeeded && !isTooManyAttempts" class="content_header">
 			<h2>Sign in</h2>
 		</div>
 
-		<div class="form">
+		<div *ngIf="!isDeviceConfirmationNeeded && !isTooManyAttempts" class="form">
 			<div class="form_creds">
 				<div class="form_creds_item">
 					<h4>SIGN IN WITH ACCOUNT NAME</h4>
-					<input type="text">
+					<input [class.error]="isCredentialsIncorrect" [(ngModel)]="accountName" (ngModelChange)="isCredentialsIncorrect = false" type="text">
 				</div>
 
 				<div class="form_creds_item">
 					<h4>PASSWORD</h4>
-					<input [type]="isPasswordVisible ? 'text' : 'password'">
+					<input [class.error]="isCredentialsIncorrect" [(ngModel)]="password" (ngModelChange)="isCredentialsIncorrect" [type]="isPasswordVisible ? 'text' : 'password'">
 					<img (click)="changePasswordVisibility()"
-						src="/assets/icons/eye{{isPasswordVisible ? '-closed' : ''}}.png" alt="">
+						src="/assets/icons/eye{{isPasswordVisible ? '-closed' : ''}}.png">
 				</div>
 
-				<div class="form_creds_item">
-					<button class="button">
+				<div class="form_creds_item submit">
+					<button (click)="login()" class="button">
 						Sign in
 					</button>
+				</div>
+
+				<div *ngIf="isCredentialsIncorrect" class="form_creds_item">
+					<div class="form_creds_item_error">
+						Please check your password and account name and try again.
+					</div>
 				</div>
 			</div>
 
 			<div class="form_qr">
 				<h4>OR SIGN IN WITH QR</h4>
-				<img [src]="qrCode" alt="">
+				<div (click)="isQRCodeExpired && startQRAuth()" class="form_qr_img-wrapper">
+					<div [class.expired]="isQRCodeExpired" class="qr-code"  *ngIf="qrCodeUrl; else noQRCode">
+						<img [src]="qrCodeUrl">
+						<img (click)="startQRAuth()" *ngIf="isQRCodeExpired" class="reload" src="/assets/icons/reload.png">
+					</div>
+
+					<ng-template #noQRCode>
+						<div class="skeleton">
+							<img src="/assets/images/qr.png">
+							<img class="spinner" *ngIf="!qrCodeUrl" src="/assets/icons/spinner.svg">
+						</div>
+					</ng-template>
+				</div>
 				<h5>Use the Steam Mobile App to sign in via QR code</h5>
 			</div>
+		</div>
+
+		<div *ngIf="isDeviceConfirmationNeeded" class="confirmation">
+			<div class="confirmation_title">
+				Account: <span class="confirmation_title_account-name">eieich</span>
+
+				<div class="confirmation_title_desc">You have a mobile authenticator protecting this account</div>
+			</div>
+
+			<div *ngIf="confirmationType === 'device'" class="confirmation_device">
+				<img src="https://community.fastly.steamstatic.com/public/images/applications/community/login_mobile_auth.png?v=e2f09e9d649508c82f214f84aba44363">
+
+				<div>Use the Steam Mobile App to confirm your sign in...</div>
+			</div>
+
+			<div *ngIf="confirmationType === 'code'" class="confirmation_code">
+				<div [class.loading]="isConfirmationCodeLoading" class="confirmation_code_input-wrapper">
+					<input #codeInput (input)="handleInput($event, 0)" (focus)="handleFocus(0)" (keydown)="handleKeydown($event, 0)" type="text">
+					<input #codeInput (input)="handleInput($event, 1)" (focus)="handleFocus(1)" (keydown)="handleKeydown($event, 1)" type="text">
+					<input #codeInput (input)="handleInput($event, 2)" (focus)="handleFocus(2)" (keydown)="handleKeydown($event, 2)" type="text">
+					<input #codeInput (input)="handleInput($event, 3)" (focus)="handleFocus(3)" (keydown)="handleKeydown($event, 3)" type="text">
+					<input #codeInput (input)="handleInput($event, 4)" (focus)="handleFocus(4)" (keydown)="handleKeydown($event, 4)" type="text">
+				</div>
+
+				<div>
+					Enter the code from your Steam Mobile App
+					<img src="/assets/images/phone.svg">
+				</div>
+			</div>
+
+			<div class="confirmation_bottom">
+				<div (click)="confirmationType = 'device'" class="confirmation_bottom_button">
+					Enter a code instead
+				</div>
+
+				<div (click)="navigateToSteamSupport()" class="confirmation_bottom_button">
+					Help, I no longer have access to my Steam Mobile App
+				</div>
+			</div>
+		</div>
+
+		<div *ngIf="isTooManyAttempts" class="too-many-attempts">
+			<h2>Too Many Retries</h2>
+			<div>There have been too many sign in failures from your location in a short time period. Please wait and try again later.</div>
+			<button (click)="isTooManyAttempts = false">Retry</button>
 		</div>
 	</div>
 </div>

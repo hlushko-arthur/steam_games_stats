@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "./http.service";
-import { Game, User, UserProfile } from "../core/interfaces/steam.interface";
+import { User, UserProfile } from "../core/interfaces/steam.interface";
 import { StoreService } from "./store.service";
+import { UserServiceAPI } from "../core/interfaces/api.interface";
 
 @Injectable({
 	providedIn: 'root'
@@ -20,23 +21,13 @@ export class UserService {
 		}
 	}
 
-	async fetchProfile(steamId: string): Promise<UserProfile> {
-		const response = await this._http.get<UserProfile>(`/user/fetch_profile?steamID=${steamId}`);
+	async fetch(payload: UserServiceAPI.FETCH.Payload): Promise<UserProfile | null> {
+		const response = await this._http.post<UserProfile>(`/user/fetch`, payload);
 
-		this._configureProfile(response.data.games);
-
-		this.userData = response.data;
-
-		this.user = this.userData.user;
-
-		return this.userData;
-	}
-
-	private _configureProfile(games: Game[]): void {
-		for (const game of games) {
-			if (game.achievements.length) {
-				game.isPerfect = game.achievements.length === game.achievementsUnlocked;
-			}
+		if (!response.status) {
+			return null;
 		}
+
+		return response.data;
 	}
 }

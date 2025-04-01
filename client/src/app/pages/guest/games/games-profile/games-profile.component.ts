@@ -44,7 +44,13 @@ export class GamesProfileComponent implements OnInit {
 			return;
 		}
 
-		this.game = await this._gs.fetch(appId, steamId);
+		const game = await this._gs.fetch(appId, steamId);
+
+		if (!game) {
+			return;
+		}
+
+		this.game = game;
 
 		this.players = await this._gs.getPlayersStats(appId);
 
@@ -105,5 +111,5 @@ export class GamesProfileComponent implements OnInit {
 			title: 'Global Unlocks',
 			sortKey: 'rarity'
 		}
-	]
+	];
 }

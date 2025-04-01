@@ -57,12 +57,16 @@ export class ProfileComponent implements OnInit {
 			return;
 		}
 
-		const { games, user } = await this._us.fetchProfile(this.steamId);
+		const profile = await this._us.fetch({
+			steamId: this.steamId
+		});
 
-		this.gs.setGames(games);
+		if (!profile) {
+			return;
+		}
 
-		this.stats.calculateStats(games);
+		this.stats.calculateStats(profile.games);
 
-		Object.assign(this, { games, user });
+		Object.assign(this, { games: profile.games, user: profile.user });
 	}
 }

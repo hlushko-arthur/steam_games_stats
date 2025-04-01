@@ -12,38 +12,48 @@ export class HttpService {
 
 	private readonly _prefix = '/api';
 
-	post<T = unknown, D = Response<T>>(url: string, payload: Record<string, unknown>): Promise<D> {
+	post<T = unknown>(url: string, payload: object): Promise<Response<T>> {
 		// url = environment.serverUrl + url;
 		url = this._prefix + url;
 
-		return new Promise((resolve, reject) => {
-			this._httpClient.post<D>(url, payload).subscribe(
+		return new Promise((resolve) => {
+			this._httpClient.post<Response<T>>(url, payload).subscribe(
 				(resp) => {
 					resolve(resp);
 				},
 				(error: { error: { message: string } }) => {
 					this.checkTokenState(error);
 
-					reject(error);
+					const response: Response<T> = {
+						status: false,
+						message: error.error.message
+					};
+
+					resolve(response);
 				}
 			);
 		});
 	}
 
-	get<T = unknown, TResponse = Response<T>>(url: string): Promise<TResponse> {
+	get<T = unknown>(url: string): Promise<Response<T>> {
 		// url = environment.serverUrl + url;
 
 		url = this._prefix + url;
 
-		return new Promise<TResponse>((resolve, reject) => {
-			this._httpClient.get<TResponse>(url).subscribe(
+		return new Promise<Response<T>>((resolve) => {
+			this._httpClient.get<Response<T>>(url).subscribe(
 				(resp) => {
 					resolve(resp);
 				},
 				(error: { error: { message: string } }) => {
 					this.checkTokenState(error);
 
-					reject(error);
+					const response: Response<T> = {
+						status: false,
+						message: error.error.message
+					};
+
+					resolve(response);
 				}
 			);
 		});

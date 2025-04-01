@@ -9,7 +9,7 @@ router.post('/fetch', async (req, res) => {
 	})
 
 	if (!user) {
-		sendError(res, 404, 'User not found');
+		res.sendError(404, 'User not found');
 
 		return;
 	}
@@ -17,15 +17,12 @@ router.post('/fetch', async (req, res) => {
 	const game = user.games.find((game) => game._id === req.body.appId);
 
 	if (!game) {
-		sendError(res, 404, 'Game not found');
+		res.sendError(404, 'Game not found');
 
 		return;
 	}
 
-	res.status(200).json({
-		status: true,
-		data: game
-	})
+	res.sendResponse(200, game);
 })
 
 router.post('/get_players_stats', async (req, res) => {
@@ -49,23 +46,10 @@ router.post('/get_players_stats', async (req, res) => {
 			})
 		}
 
-		res.status(200).json({
-			status: true,
-			data: response
-		})
+		res.sendResponse(200, response);
 	} catch (error) {
-		res.status(500).json({
-			status: false,
-			error: error.message || error
-		})
+		res.sendError(500, error.message || error)
 	}
 })
-
-function sendError(res, statusCode, message) {
-	res.status(statusCode).json({
-		status: false,
-		message: message
-	})
-}
 
 export default router;

@@ -9,10 +9,18 @@ const hltbService = new hltb.HowLongToBeatService();
 const router = express.Router()
 const API_KEY = process.env.STEAM_API_KEY;
 
-router.get('/fetch_profile',
+router.post('/fetch',
 	async (req, res) => {
 		try {
-			const steamId = req.query.steamID;
+			const steamId = req.body.steamId;
+
+			if (req.body.profileOnly) {
+				const user = await getUserInformation(steamId);
+
+				res.sendResponse(200, { user: user });
+
+				return;
+			}
 
 			const _user = await User.findOne({
 				"user.steamId": steamId
@@ -53,13 +61,6 @@ router.get('/fetch_profile',
 				game.review = gameReview;
 
 				Object.assign(game, gameDetails);
-
-				// game.publisher = gameDetails.publisher;
-				// game.developer = gameDetails.developer;
-				// game.genres = gameDetails.genres;
-				// game.price = gameDetails.price;
-				// game.releaseDate = gameDetails.releaseDate;
-				// game.metacritic = gameDetails.metacritic;
 			}))
 
 			games = games.map((game) => {
