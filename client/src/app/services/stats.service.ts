@@ -32,7 +32,7 @@ export class StatsService {
 		average: 0,
 		median: 0,
 		completions: 0
-	}
+	};
 
 	gamesChart: StatsChart = this._emptyGamesChart();
 
@@ -71,6 +71,7 @@ export class StatsService {
 
 		for (const game of games) {
 			achievements.push(...game.achievements.filter((a) => a.achieved));
+
 			for (const achievement of game.achievements) {
 				if (!achievement.achieved) {
 					continue;
@@ -88,12 +89,9 @@ export class StatsService {
 
 		achievements = achievements.sort((a, b) => {
 			return a.rarity > b.rarity ? 1 : -1;
-		})
+		});
 
 		this.rarestAchievements = achievements.slice(0, 20);
-
-		console.log(this.rarestAchievements);
-
 
 		this.achievements.dailyAverage = Number((Object.values(grouped).reduce((total, value) => total += value, 0) / Object.keys(grouped).length).toFixed(2));
 
@@ -150,13 +148,16 @@ export class StatsService {
 
 			for (const key of keys) {
 				const from = Number(key.split('-')[0]);
+
 				const to = Number(key.split('-')[1]);
 
 				if (completionValue === 100) {
 					this.gamesChart[100].value++;
+
 					break;
 				} else if (completionValue >= from && completionValue < to) {
 					this.gamesChart[key].value++;
+
 					break;
 				}
 			}
@@ -180,6 +181,7 @@ export class StatsService {
 
 				for (const key of keys) {
 					const from = Number(key.split('-')[1]);
+
 					const to = Number(key.split('-')[0]);
 
 					if (achievement.rarity >= from && achievement.rarity < to) {
@@ -243,7 +245,7 @@ export class StatsService {
 				value: 0,
 				height: 0
 			},
-		}
+		};
 	}
 
 	private _emptyGamesChart(): StatsChart {
@@ -292,6 +294,6 @@ export class StatsService {
 				value: 0,
 				height: 0
 			}
-		}
+		};
 	}
 }

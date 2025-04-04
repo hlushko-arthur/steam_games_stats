@@ -11,6 +11,7 @@ export class TableBodyDirective {
 	selector: 'ng-template[w-table-custom]'
 })
 export class CustomTdDirective {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	@Input() 'w-table-custom': any;
 
 	constructor(public template: TemplateRef<unknown>) {}

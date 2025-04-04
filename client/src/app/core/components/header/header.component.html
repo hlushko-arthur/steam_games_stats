@@ -17,16 +17,31 @@
 		</div>
 	</nav>
 
-	<div class="header_profile">
+	<div w-dropdown="profile" [minWidth]="130" class="header_profile">
 		<ng-container *ngIf="us.user.steamId; else signIn">
-			{{us.user.name}}
+			<span class="header_profile_name">{{us.user.name}}</span>
 			<div class="header_profile_avatar">
 				<img [src]="fs.avatar(us.user.avatar, 'medium')">
 			</div>
 		</ng-container>
 
 		<ng-template #signIn>
+			<img src="/assets/icons/signin.png">
 			<div routerLink="/login">Sign In</div>
 		</ng-template>
+
+		<w-dropdown id="profile">
+			<div class="profile-dropdown">
+				<div class="profile-dropdown_item">
+					<img src="/assets/icons/user.png">
+					My Profile
+				</div>
+
+				<div class="profile-dropdown_item">
+					<img src="/assets/icons/signin.png">
+					Sign Out
+				</div>
+			</div>
+		  </w-dropdown>
 	</div>
 </div>

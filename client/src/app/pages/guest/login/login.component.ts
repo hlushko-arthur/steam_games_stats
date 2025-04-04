@@ -27,7 +27,7 @@ export class LoginComponent implements OnInit {
 
 	isDeviceConfirmationNeeded = false;
 
-	isTooManyAttempts = true;
+	isTooManyAttempts = false;
 
 	isConfirmationCodeLoading = false;
 
