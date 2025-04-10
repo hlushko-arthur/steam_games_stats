@@ -3,7 +3,7 @@ import User from '../user/user.collection.js';
 
 const router = express.Router()
 
-router.post('/fetch', async (req, res) => {
+router.post('/user_status', async (req, res) => {
 	const user = await User.findOne({
 		steamId: req.body.steamId
 	})
@@ -23,6 +23,10 @@ router.post('/fetch', async (req, res) => {
 	}
 
 	res.sendResponse(200, game);
+})
+
+router.post('/fetch', async (req, res) => {
+	res.sendError(500, 'hello :)')
 })
 
 router.post('/get_players_stats', async (req, res) => {

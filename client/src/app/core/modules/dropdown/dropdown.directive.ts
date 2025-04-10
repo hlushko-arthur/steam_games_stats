@@ -28,7 +28,7 @@ export class DropdownDirective implements AfterViewInit {
 
 			this.renderer.setStyle(this.dropdown, 'overflow', 'hidden');
 
-			this.renderer.setStyle(this.dropdown, 'height', '100%');
+			this.renderer.setStyle(this.dropdown, 'height', '0px');
 
 			this.renderer.setStyle(this.dropdown, 'transition', 'height 0.2s');
 

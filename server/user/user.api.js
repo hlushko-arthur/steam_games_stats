@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import hltb from 'howlongtobeat';
 
 import User from './user.collection.js';
+import Game from '../game/game.collection.js';
+
+// TODO: Google Secrets Manager 
 
 const hltbService = new hltb.HowLongToBeatService();
 const router = express.Router()
@@ -62,6 +65,21 @@ router.post('/fetch',
 
 				Object.assign(game, gameDetails);
 			}))
+
+			const operations = games.map(game => ({
+				updateOne: {
+					filter: { _id: game._id },
+					update: {
+						$set: {
+							...game,
+							totalAchievements: game.achievements?.length || 0
+						}
+					},
+					upsert: true
+				}
+			}));
+
+			await Game.bulkWrite(operations);
 
 			games = games.map((game) => {
 				const achievementsUnlocked = game.achievements.filter((achievement) => achievement.achieved).length;

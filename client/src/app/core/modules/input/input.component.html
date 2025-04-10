@@ -1,5 +1,5 @@
 <div *ngIf="title" class="title">{{title}}</div>
-<div class="input-container">
-	<input type="text" [placeholder]="placeholder">
-	<img src="/assets/icons/search.png">
+<div class="input-container" [style.width]="width">
+	<input [(ngModel)]="model" (ngModelChange)="onChangeModel()" type="text" [placeholder]="placeholder">
+	<img *ngIf="iconType === 'search'" src="/assets/icons/search.png">
 </div>

@@ -1,23 +1,10 @@
 import mongoose from 'mongoose';
 
 const gameSchema = new mongoose.Schema({
-	achievements: [{
-		appId: Number,
-		displayName: String,
-		icon: String,
-		iconGray: String,
-		name: String,
-		description: String,
-		unlockTime: String,
-		achieved: Boolean,
-		rarity: Number
-	}],
+	totalAchievements: Number,
 	_id: Number,
 	icon: String,
 	name: String,
-	playtime: Number,
-	lastPlayed: Number,
-	recentPlaytime: Number,
 	developer: String,
 	publisher: String,
 	releaseDate: String,
@@ -36,10 +23,10 @@ const gameSchema = new mongoose.Schema({
 	metacritic: {
 		score: Number,
 		url: String
-	}
+	},
+	createdAt: Number 
 })
 
-export const GameSchema = gameSchema;
 
 const Game = mongoose.model('Game', gameSchema);
 

@@ -10,6 +10,8 @@ import { GamesProfileComponent } from './pages/guest/games/games-profile/games-p
 import { DashboardComponent } from './pages/guest/dashboard/dashboard.component';
 import { GuestGuard } from './core/guards/guest.guard';
 import { HeaderComponent } from './core/components/header/header.component';
+import { CalculatorComponent } from './pages/guest/calculator/calculator.component';
+import { CalculatorProfileComponent } from './pages/guest/calculator/calculator-profile/calculator-profile.component';
 
 const routes: Routes = [
 	{
@@ -32,6 +34,14 @@ const routes: Routes = [
 	{
 		path: 'dashobard',
 		component: DashboardComponent
+	},
+	{
+		path: 'calculator',
+		component: CalculatorComponent
+	},
+	{
+		path: 'calculator/:profileId',
+		component: CalculatorProfileComponent
 	},
 	{
 		path: '**',

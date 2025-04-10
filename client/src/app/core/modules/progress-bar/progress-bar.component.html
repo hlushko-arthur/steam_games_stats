@@ -1,0 +1,14 @@
+<div class="progress-bar-wrapper">
+	@if (titleTemplate) {
+	<div class="title">
+		<ng-template [ngTemplateOutlet]="titleTemplate"></ng-template>
+	</div>
+	} @else if (title) {
+	<div class="title">{{title}}</div>
+	}
+
+	<div [style.height]="height + 'px'" class="progress-bar">
+		<div class="progress-fill" [style.width]="fill + '%'">
+		</div>
+	</div>
+</div>
