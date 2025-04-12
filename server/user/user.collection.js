@@ -7,9 +7,73 @@ const userSchema = new mongoose.Schema({
 	REFRESH_TOKEN: String,
 	user: {
 		name: String,
-		avatar: String,
 		timeCreated: Number,
 		steamId: String,
+		avatar: {
+			title: String,
+			appId: Number,
+			type: { type: Number },
+			class: Number,
+			icon: String,
+			iconAnimated: String
+		},
+		background: {
+			title: String,
+			appId: Number,
+			type: { type: Number },
+			class: Number,
+			icon: String,
+			iconAnimated: String,
+		},
+		miniBackground: {
+			title: String,
+			appId: Number,
+			type: { type: Number },
+			class: Number,
+			icon: String,
+			iconAnimated: String,
+		},
+		avatarFrame: {
+			title: String,
+			appId: Number,
+			type: { type: Number },
+			class: Number,
+			icon: String,
+			iconAnimated: String,
+		},
+		badges: {
+			special: Number,
+			default: Number,
+			foil: Number,
+			levels: {
+				'1': Number,
+				'2': Number,
+				'3': Number,
+				'4': Number,
+				'5': Number,
+				'6+': Number
+			},
+			items: [{
+				_id: Number,
+				level: Number,
+				xp: Number,
+				appId: Number,
+				isFoil: Boolean
+			}]
+		},
+		level: {
+			currentXP: Number,
+			totalXP: Number,
+			nextLevelXP: Number,
+			value: Number,
+		},
+		bans: {
+			VAC: Boolean,
+			game: Boolean,
+			community: Boolean,
+			economy: Boolean
+
+		}
 	},
 	games: [{
 		achievements: [{

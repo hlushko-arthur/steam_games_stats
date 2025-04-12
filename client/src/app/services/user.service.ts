@@ -30,4 +30,14 @@ export class UserService {
 
 		return response.data;
 	}
+
+	async calculate(steamId: string): Promise<any> {
+		const response = await this._http.get<any>(`/user/calculator/${steamId}`,);
+
+		if (!response.status) {
+			return null;
+		}
+
+		return response.data;
+	}
 }

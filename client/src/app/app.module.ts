@@ -40,7 +40,7 @@ const routes: Routes = [
 		component: CalculatorComponent
 	},
 	{
-		path: 'calculator/:profileId',
+		path: 'calculator/:steamId',
 		component: CalculatorProfileComponent
 	},
 	{

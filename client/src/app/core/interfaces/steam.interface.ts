@@ -53,8 +53,52 @@ export interface Game {
 	}
 }
 
+interface customizationItem {
+	title: string;
+	type: number;
+	class: number;
+	appId: number;
+	icon: string;
+	iconAnimated: string;
+}
+
 export interface User {
-	avatar: string;
+	avatar: customizationItem;
+	avatarFrame: customizationItem;
+	background: customizationItem;
+	miniBackground: customizationItem;
+	badges: {
+		special: number,
+		default: number,
+		foil: number,
+		levels: {
+			'1': number,
+			'2': number,
+			'3': number,
+			'4': number,
+			'5': number,
+			'6+': number
+		},
+		items: [{
+			_id: number,
+			level: number,
+			xp: number,
+			appId: number,
+			isFoil: boolean
+		}]
+	},
+	bans: {
+		VAC: boolean;
+		game: boolean;
+		economy: boolean;
+		community: boolean;
+	},
+	level: {
+		currentXP: number,
+		totalXP: number,
+		nextLevelXP: number,
+		value: number,
+	},
 	name: string;
 	steamId: string;
 	timeCreated: number;

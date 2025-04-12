@@ -6,6 +6,8 @@ import hltb from 'howlongtobeat';
 import User from './user.collection.js';
 import Game from '../game/game.collection.js';
 
+import * as UserUtils from './user.utils.js';
+
 // TODO: Google Secrets Manager 
 
 const hltbService = new hltb.HowLongToBeatService();
@@ -17,20 +19,26 @@ router.post('/fetch',
 		try {
 			const steamId = req.body.steamId;
 
-			if (req.body.profileOnly) {
-				const user = await getUserInformation(steamId);
+			const profile = await User.findOne({
+				"steamId": steamId
+			})
 
-				res.sendResponse(200, { user: user });
-
+			if (profile) {
+				res.status(200).json({ status: true, data: _clearResponse(profile) });
 				return;
 			}
 
-			const _user = await User.findOne({
-				"user.steamId": steamId
-			})
+			if (req.body.profileOnly) {
+				const user = await UserUtils.getUserInformation(steamId);
 
-			if (_user) {
-				res.status(200).json({ status: true, data: _clearResponse(_user) });
+				await User.updateOne({
+					steamId: steamId
+				}, {
+					user: user
+				});
+
+				res.sendResponse(200, user);
+
 				return;
 			}
 
@@ -40,7 +48,7 @@ router.post('/fetch',
 				steamId: steamId
 			}))?.ACCESS_TOKEN || '';
 
-			let games = await getUserGames(steamId, accessToken)
+			let games = await UserUtils.getUserGames(steamId, accessToken)
 
 			games.sort((a, b) => {
 				if (a.rtime_last_played < b.rtime_last_played) {
@@ -51,15 +59,15 @@ router.post('/fetch',
 			});
 
 			await Promise.all(games.map(async (game) => {
-				const gameAchievements = await getGameAchievements(game.appid, steamId);
+				const gameAchievements = await UserUtils.getGameAchievements(game.appid, steamId);
 
 				game.achievements = gameAchievements.sort((a, b) => {
 					return (a.unlockTime || 0) > (b.unlockTime || 0) ? -1 : 1;
 				});;
 
-				const gameDetails = await getGameDetails(game.appid);
+				const gameDetails = await UserUtils.getGameDetails(game.appid);
 
-				const gameReview = await getGameReviews(game.appid);
+				const gameReview = await UserUtils.getGameReviews(game.appid);
 
 				game.review = gameReview;
 
@@ -104,7 +112,7 @@ router.post('/fetch',
 				}
 			})
 
-			const user = await getUserInformation(steamId);
+			const user = await UserUtils.getUserInformation(steamId);
 
 			let userSchema = await User.findOne({
 				steamId: steamId
@@ -141,174 +149,16 @@ router.post('/fetch',
 				error: error.message || error
 			})
 		}
-	})
-
-async function getUserInformation(steamId) {
-	try {
-		const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${API_KEY}&steamids=${steamId}`;
-
-		const response = await fetch(url);
-		const data = await response.json();
-
-		const userData = data.response.players[0];
-
-		return {
-			name: userData.personaname,
-			avatar: userData.avatarhash,
-			timeCreated: userData.timecreated,
-			steamId: userData.steamid,
-		}
-	} catch (error) {
-		throw error;
 	}
-}
+)
 
-async function getUserGames(steamId, accessToken) {
-	const baseUrl = 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/';
+router.get('/calculator/:steamId', async (req, res) => {
+	const steamId = req.params.steamId;
 
-	const params = new URLSearchParams({
-		steamid: steamId,
-		include_appinfo: true,
-		include_played_free_games: true
-	})
+	const t = UserUtils.test();
 
-	if (accessToken) {
-		params.append('access_token', accessToken);
-	} else {
-		params.append('key', API_KEY);
-	}
-
-	const url = `${baseUrl}?${params.toString()}`;
-
-	try {
-		const response = await axios.get(url);
-		return response.data.response.games || [];
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getGameAchievements(appId, steamId) {
-	try {
-		const url = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${API_KEY}&appid=${appId}`;
-
-		const response = await axios.get(url);
-
-		if (!response.data.game.availableGameStats) {
-			return [];
-		}
-
-		const achievements = (response.data.game.availableGameStats.achievements || []).reduce((obj, item) => {
-			obj[item.name] = item;
-			return obj;
-		}, {});
-
-		const userAchievements = await getUserAchievementsForGame(appId, steamId) || []
-
-		const percentageAchievements = await getAchievementPercentageForGame(appId);
-
-		for (const _achievement of userAchievements) {
-			achievements[_achievement.apiname].unlockTime = _achievement.unlocktime;
-
-			achievements[_achievement.apiname].achieved = true;
-		}
-
-		for (const _achievement of percentageAchievements) {
-			achievements[_achievement.name].rarity = _achievement.percent;
-		}
-
-		const regex = /\/([A-z0-9]*)\.jpg/
-
-		return Object.values(achievements).map((achievement) => {
-			return {
-				appId: appId,
-				icon: achievement.icon.match(regex)[1],
-				iconGray: achievement.icongray.match(regex)[1],
-				displayName: achievement.displayName,
-				name: achievement.name,
-				description: achievement.description,
-				achieved: achievement.achieved ?? false,
-				unlockTime: achievement.unlockTime,
-				rarity: achievement.rarity,
-			}
-		});
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getUserAchievementsForGame(appId, steamId) {
-	try {
-		const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${API_KEY}&steamid=${steamId}&appid=${appId}`;
-
-		const response = await fetch(url);
-		const data = await response.json();
-		return (data.playerstats.achievements || []).filter((achievement) => achievement.achieved);
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getAchievementPercentageForGame(appId) {
-	try {
-		const url = `https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?key=${API_KEY}&gameid=${appId}`;
-
-		const response = await axios.get(url);
-		return response.data.achievementpercentages.achievements || [];
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getGameDetails(appId) {
-	try {
-		const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=US&l=en&filters=developers,publishers,price_overview,release_date,genres,metacritic`;
-
-		const response = await axios.get(url);
-
-		if (!response.data[appId].success) {
-			return {};
-		}
-
-		let data = response.data[appId].data;
-
-		data = {
-			developer: data.developers[0],
-			publisher: data.publishers[0],
-			price: {
-				currency: data.price_overview?.currency || 'USD',
-				value: data.price_overview?.final ?? 0,
-				formatted: data.price_overview?.final_formatted || '$0'
-			},
-			genres: (data.genres || []).map((genre) => genre.description),
-			releaseDate: data.release_date.date,
-			metacritic: data.metacritic
-		}
-
-		return data;
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getGameReviews(appId) {
-	try {
-		const url = `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&num_per_page=0&purchase_type=all`;
-
-		const response = await axios.get(url);
-
-		const data = {
-			totalPositive: response.data.query_summary.total_positive,
-			totalNegative: response.data.query_summary.total_negative,
-			score: response.data.query_summary.review_score,
-			rating: Number((response.data.query_summary.total_positive / (response.data.query_summary.total_positive + response.data.query_summary.total_negative) * 100).toFixed(2)) || 0
-		}
-
-		return data;
-	} catch (error) {
-		throw error;
-	}
-}
+	res.sendResponse(200, t);
+})
 
 async function _checkTokenState(steamId) {
 	try {
@@ -373,5 +223,7 @@ function _clearResponse(data) {
 
 	return _data;
 }
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default router;

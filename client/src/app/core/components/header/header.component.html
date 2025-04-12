@@ -25,7 +25,7 @@
 		<ng-container *ngIf="us.user.steamId; else signIn">
 			<span class="header_profile_name">{{us.user.name}}</span>
 			<div class="header_profile_avatar">
-				<img [src]="fs.avatar(us.user.avatar, 'medium')">
+				<img [src]="fs.avatar(us.user.avatar.icon, 'medium')">
 			</div>
 		</ng-container>
 
@@ -46,6 +46,6 @@
 					Sign Out
 				</div>
 			</div>
-		  </w-dropdown>
+		</w-dropdown>
 	</div>
 </div>

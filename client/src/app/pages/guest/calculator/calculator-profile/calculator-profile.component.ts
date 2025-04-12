@@ -1,19 +1,45 @@
+import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { User } from "src/app/core/interfaces/steam.interface";
 import { MiniTableComponent } from "src/app/core/modules/mini-table/mini-table.component";
 import { ProgressBarModule } from "src/app/core/modules/progress-bar/progress-bar.module";
+import { UserService } from "src/app/services/user.service";
 
 @Component({
 	templateUrl: './calculator-profile.component.html',
 	styleUrl: './calculator-profile.component.scss',
 	standalone: true,
-	imports: [ProgressBarModule, MiniTableComponent]
+	imports: [CommonModule, ProgressBarModule, MiniTableComponent]
 })
 export class CalculatorProfileComponent implements OnInit {
 
-	// con;
+	user!: User;
 
-	ngOnInit(): void {
-		
+	constructor(private _user: UserService, private _activatedRoute: ActivatedRoute) { }
+
+	async ngOnInit(): Promise<void> {
+		const steamId = this._activatedRoute.snapshot.paramMap.get('steamId');
+
+		if (!steamId) {
+			return;
+		}
+
+		const profile = await this._user.fetch({
+			steamId: steamId,
+			profileOnly: true
+		});
+
+		if (!profile) {
+			return;
+		}
+
+		await this._user.calculate(steamId);
+
+		this.user = profile.user;
+
+		console.log(profile);
+
 	}
 
 	gamesByCost = [

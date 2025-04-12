@@ -65,6 +65,9 @@ export class ProfileComponent implements OnInit {
 			return;
 		}
 
+		console.log(profile);
+		
+
 		this.stats.calculateStats(profile.games);
 
 		Object.assign(this, { games: profile.games, user: profile.user });

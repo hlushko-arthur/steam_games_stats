@@ -28,17 +28,4 @@ export class MiniTableComponent {
 	}
 
 	private _width = 'min-content';
-
-	constructor() {
-		console.log(this.items);
-		
-	}
-
-	// isLine(item: MiniTableItem): item is Line {
-	// 	return 'line' in item;
-	// }
-
-	// isItem(item: MiniTableItem): item is Item {
-	// 	return 'title' in item;
-	// }
 }
