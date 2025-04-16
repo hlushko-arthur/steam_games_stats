@@ -1,22 +1,28 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { User } from "src/app/core/interfaces/steam.interface";
+import { SteamLevelComponent } from "src/app/core/components/steam-level/steam-level.component";
+import { UserAvatarComponent } from "src/app/core/components/user-avatar/user-avatar.component";
+import { BackdropDirective } from "src/app/core/directives/backdrop.directive";
+import { UserCalculation } from "src/app/core/interfaces/user.interface";
 import { MiniTableComponent } from "src/app/core/modules/mini-table/mini-table.component";
 import { ProgressBarModule } from "src/app/core/modules/progress-bar/progress-bar.module";
+import { DateFormatPipe } from "src/app/core/pipes/date-format.pipe";
+import { TimeFormatPipe } from "src/app/core/pipes/time-format.pipe";
+import { FileService } from "src/app/services/file.service";
 import { UserService } from "src/app/services/user.service";
 
 @Component({
 	templateUrl: './calculator-profile.component.html',
 	styleUrl: './calculator-profile.component.scss',
 	standalone: true,
-	imports: [CommonModule, ProgressBarModule, MiniTableComponent]
+	imports: [CommonModule, ProgressBarModule, MiniTableComponent, BackdropDirective, TimeFormatPipe, DateFormatPipe, SteamLevelComponent, UserAvatarComponent]
 })
 export class CalculatorProfileComponent implements OnInit {
 
-	user!: User;
+	user!: UserCalculation;
 
-	constructor(private _user: UserService, private _activatedRoute: ActivatedRoute) { }
+	constructor(public fs: FileService, private _user: UserService, private _activatedRoute: ActivatedRoute) { }
 
 	async ngOnInit(): Promise<void> {
 		const steamId = this._activatedRoute.snapshot.paramMap.get('steamId');
@@ -25,21 +31,13 @@ export class CalculatorProfileComponent implements OnInit {
 			return;
 		}
 
-		const profile = await this._user.fetch({
-			steamId: steamId,
-			profileOnly: true
-		});
+		const user = await this._user.getCalculation(steamId);
 
-		if (!profile) {
+		if (!user) {
 			return;
 		}
 
-		await this._user.calculate(steamId);
-
-		this.user = profile.user;
-
-		console.log(profile);
-
+		this.user = user;
 	}
 
 	gamesByCost = [

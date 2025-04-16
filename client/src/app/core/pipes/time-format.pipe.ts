@@ -1,11 +1,12 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
-	name: 'timeFormat'
+	name: 'timeFormat',
+	standalone: true
 })
 
 export class TimeFormatPipe implements PipeTransform {
-	transform(time: number): string {
+	transform(time: number, type?: 'h' | 'hm'): string {
 		if (!time) {
 			return '';
 		}
@@ -16,10 +17,14 @@ export class TimeFormatPipe implements PipeTransform {
 
 		let result = '';
 
-		if (h) {
-			result = `${h}h ${m}m`;
-		} else {
-			result = `${m}m`;
+		if (type === 'h') {
+			result = `${(time / 60).toFixed(1)}h`;
+		} else if (type === 'hm' || !type) {
+			if (h) {
+				result = `${h}h ${m}m`;
+			} else {
+				result = `${m}m`;
+			}
 		}
 
 		return result;

@@ -1,22 +1,24 @@
-<ng-container *ngIf="user?.steamId">
-	<div class="backdrop"
-		[style.background-image]="'url(https://cdn.fastly.steamstatic.com/steamcommunity/public/images/items/1091500/4ab21a6c318ce3e8f63757cb2481ef54888e3a5c.jpg)'">
-	</div>
-	<div class="container">
+<ng-container>
+	<!-- <div class="backdrop"
+		[style.background-image]="'url(' + fs.profileBackground(user.background.icon) + ')'">
+	</div> -->
+	<div *ngIf="user?.steamId" class="container" [backdrop]="user.background.iconAnimated">
 		<div class="header">
 			<div class="header_user">
-				<img class="header_user_avatar"
-					src="https://avatars.steamstatic.com/acf67207768cdc5be5f09aca6a9f7830bf27d6f7_full.jpg" alt="">
+				<!-- <img class="header_user_avatar"
+					src="https://avatars.steamstatic.com/acf67207768cdc5be5f09aca6a9f7830bf27d6f7_full.jpg"> -->
+
+					<w-user-avatar [size]="96" [avatar]="user.avatar.iconAnimated" [frame]="user.avatarFrame.iconAnimated"></w-user-avatar>
 
 				<div class="header_user_info">
 					<div class="header_user_info_name">
 						{{user.name}}
-						<span class="header_user_info_name_level">{{user.level.value}}</span>
+						 <w-steam-level [level]="user.level.value"></w-steam-level>
 					</div>
 
 					<div class="header_user_info_stats">
 						<div class="header_user_info_stats_years">
-							2.2 years on Steam
+							{{user.timeCreated | dateFormat: 'years'}} years on Steam
 						</div>
 					</div>
 				</div>
@@ -25,22 +27,22 @@
 			<div class="header_stats">
 				<div class="header_stats_row">
 					<div class="header_stats_row_progress-bar">
-						<w-progress-bar [height]="12" [fill]="80">
+						<w-progress-bar [height]="12" [fill]="user.playedGamesPercent">
 							<ng-template w-progress-bar-title>
 								<div class="header_stats_row_progress-bar_title">
-									<div><span>127</span> out of <span>154</span> games played</div>
-									<div>82%</div>
+									<div><span>{{user.playedGamesCount}}</span> out of <span>{{user.totalGamesCount}}</span> games played</div>
+									<div>{{user.playedGamesPercent}}%</div>
 								</div>
 							</ng-template>
 						</w-progress-bar>
 					</div>
 
 					<div class="header_stats_row_progress-bar">
-						<w-progress-bar [height]="12" [fill]="80">
+						<w-progress-bar [height]="12" [value]="user.level.currentXP" [maxValue]="user.level.nextLevelXP">
 							<ng-template w-progress-bar-title>
 								<div class="header_stats_row_progress-bar_title">
-									<div><span>328</span> / 500 XP to next level</div>
-									<div>10.328 XP</div>
+									<div><span>{{user.level.currentXP}}</span> / <span>{{user.level.nextLevelXP}}</span> XP to next level</div>
+									<div>{{user.level.totalXP}} XP</div>
 								</div>
 							</ng-template>
 						</w-progress-bar>
@@ -56,7 +58,7 @@
 					</div>
 
 					<div class="header_calculation_item_value">
-						$18.92
+						{{user.averageGamesPrice}}
 					</div>
 
 					<div class="header_calculation_item_description">
@@ -71,7 +73,7 @@
 					</div>
 
 					<div class="header_calculation_item_value">
-						$0.09
+						{{user.pricePerHour}}
 					</div>
 
 					<div class="header_calculation_item_description">
@@ -85,7 +87,7 @@
 					</div>
 
 					<div class="header_calculation_item_value">
-						4970h
+						{{user.totalPlaytime | timeFormat: 'h'}}
 					</div>
 				</div>
 
@@ -95,18 +97,33 @@
 					</div>
 
 					<div class="header_calculation_item_value">
-						39.1h
+						{{user.averagePlaytime | timeFormat: 'h'}}
 					</div>
 				</div>
 
 				<div class="header_calculation_item">
 					<div class="header_calculation_item_title">
-						Today`s prices
+						Today`s price
 						<img src="/assets/icons/info.png" alt="">
 					</div>
 
 					<div class="header_calculation_item_value">
-						$2650
+						{{user.todayGamesPrice}}
+					</div>
+
+					<div class="header_calculation_item_description">
+						This is the average price calculated from all services.
+					</div>
+				</div>
+
+				<div class="header_calculation_item">
+					<div class="header_calculation_item_title">
+						Total price
+						<img src="/assets/icons/info.png" alt="">
+					</div>
+
+					<div class="header_calculation_item_value">
+						{{user.totalGamesPrice}}
 					</div>
 
 					<div class="header_calculation_item_description">
@@ -120,22 +137,22 @@
 
 		<div class="stats">
 			<div class="stats_item">
-				<w-mini-table width="100%" title="Games by playtime" [items]="gamesByPlaytime"></w-mini-table>
+				<w-mini-table width="100%" title="Games by playtime" [items]="user.gamesByPlaytime"></w-mini-table>
 			</div>
 
 			<div class="stats_item">
-				<w-mini-table width="100%" title="Games by cost" [items]="gamesByCost"></w-mini-table>
+				<w-mini-table width="100%" title="Games by cost" [items]="user.gamesByCost"></w-mini-table>
 			</div>
 
 			<div class="stats_item">
-				<w-mini-table width="100%" title="Badges" [items]="badges"></w-mini-table>
+				<w-mini-table width="100%" title="Badges" [items]="user.badges"></w-mini-table>
 			</div>
 
 			<div class="stats_item">
 				<w-mini-table width="100%" title="Profile Customizations"
-					[items]="profileCustomizations"></w-mini-table>
+					[items]="user.customization"></w-mini-table>
 
-				<w-mini-table width="100%" title="Bans and restrictions" [items]="bans"></w-mini-table>
+				<w-mini-table width="100%" title="Bans and restrictions" [items]="user.bans"></w-mini-table>
 			</div>
 		</div>
 	</div>

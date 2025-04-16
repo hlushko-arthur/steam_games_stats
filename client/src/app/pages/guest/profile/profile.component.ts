@@ -8,12 +8,14 @@ import { StatsService } from "src/app/services/stats.service";
 import { UserService } from "src/app/services/user.service";
 import { ChartComponent } from "./chart/chart.component";
 import { GameService } from "src/app/services/game.service";
+import { TimeFormatPipe } from "src/app/core/pipes/time-format.pipe";
+import { DateFormatPipe } from "src/app/core/pipes/date-format.pipe";
 
 @Component({
 	templateUrl: './profile.component.html',
 	styleUrls: ['./profile.component.scss'],
 	standalone: true,
-	imports: [CoreModule, ChartComponent, RouterLink]
+	imports: [CoreModule, ChartComponent, RouterLink, TimeFormatPipe, DateFormatPipe]
 })
 
 export class ProfileComponent implements OnInit {

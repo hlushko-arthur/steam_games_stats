@@ -5,13 +5,15 @@ import { CoreModule } from "../../core.module";
 import { SortPipe } from "../../pipes/sort.pipe";
 import { TableViewMode } from "../../modules/table/table.interface";
 import { RouterLink } from "@angular/router";
+import { TimeFormatPipe } from "../../pipes/time-format.pipe";
+import { DateFormatPipe } from "../../pipes/date-format.pipe";
 
 @Component({
 	selector: 'games-table',
 	templateUrl: './games-table.component.html',
 	styleUrl: './games-table.component.scss',
 	standalone: true,
-	imports: [CoreModule, SortPipe, RouterLink]
+	imports: [CoreModule, SortPipe, RouterLink, TimeFormatPipe, DateFormatPipe]
 })
 
 export class GamesTableComponent {

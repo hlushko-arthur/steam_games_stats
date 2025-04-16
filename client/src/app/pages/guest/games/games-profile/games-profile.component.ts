@@ -4,6 +4,8 @@ import { CoreModule } from "src/app/core/core.module";
 import { Game } from "src/app/core/interfaces/steam.interface";
 import { TableHeaders } from "src/app/core/modules/table/table.interface";
 import { TableModule } from "src/app/core/modules/table/table.module";
+import { DateFormatPipe } from "src/app/core/pipes/date-format.pipe";
+import { TimeFormatPipe } from "src/app/core/pipes/time-format.pipe";
 import { FileService } from "src/app/services/file.service";
 import { GameService } from "src/app/services/game.service";
 import { UserService } from "src/app/services/user.service";
@@ -12,7 +14,7 @@ import { UserService } from "src/app/services/user.service";
 	templateUrl: './games-profile.component.html',
 	styleUrl: './games-profile.component.scss',
 	standalone: true,
-	imports: [CoreModule, TableModule]
+	imports: [CoreModule, TableModule, TimeFormatPipe, DateFormatPipe]
 })
 
 export class GamesProfileComponent implements OnInit {
@@ -55,10 +57,6 @@ export class GamesProfileComponent implements OnInit {
 		this.players = await this._gs.getPlayersStats(appId);
 
 		this.players.push(...new Array(4).fill(this.players[0]));
-
-		console.log(this.players);
-		
-		console.log('game', this.game);
 
 		this._processGame();
 		

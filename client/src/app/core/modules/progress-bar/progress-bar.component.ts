@@ -1,5 +1,4 @@
-import { Component, ContentChild, Input, TemplateRef } from "@angular/core";
-import { Fill } from "./progress-bar.interface";
+import { Component, ContentChild, Input, OnInit, TemplateRef } from "@angular/core";
 import { ProgressBarTitleDirective } from "./progress-bar.directive";
 
 @Component({
@@ -8,12 +7,32 @@ import { ProgressBarTitleDirective } from "./progress-bar.directive";
 	styleUrl: './progress-bar.component.scss'
 })
 
-export class ProgressBarComponent {
+export class ProgressBarComponent implements OnInit {
 	@ContentChild(ProgressBarTitleDirective, { read: TemplateRef }) titleTemplate?: TemplateRef<unknown>;
 
-	@Input() fill: Fill = 0;
+	@Input() fill?: number = 0;
+
+	@Input() value?: number;
+
+	@Input() maxValue?: number;
 
 	@Input() height = 6;
 
-	@Input() title = '127 out of 154 games played';
+	@Input() title?: string;
+
+	progressValue = 0;
+
+	ngOnInit(): void {
+		if (this.value !== undefined && this.maxValue === undefined) {
+			 throw new Error('[ProgressBarComponent] `maxValue` is required when `value` is set.');
+		} else if (this.maxValue !== undefined && this.value === undefined) {
+			throw new Error('[ProgressBarComponent] `value` is required when `maxValue` is set.');
+		}
+
+		if (this.fill) {
+			this.progressValue = this.fill;
+		} else if (this.value && this.maxValue) {
+			this.progressValue = this.value / this.maxValue * 100;
+		}
+	}
 }

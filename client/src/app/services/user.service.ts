@@ -3,6 +3,7 @@ import { HttpService } from "./http.service";
 import { User, UserProfile } from "../core/interfaces/steam.interface";
 import { StoreService } from "./store.service";
 import { UserServiceAPI } from "../core/interfaces/api.interface";
+import { UserCalculation } from "../core/interfaces/user.interface";
 
 @Injectable({
 	providedIn: 'root'
@@ -15,6 +16,9 @@ export class UserService {
 
 	constructor(private _http: HttpService, private _store: StoreService) {
 		const user = this._store.getJson<User>('user');
+
+		console.log(user);
+		
 
 		if (user) {
 			this.user = user;
@@ -31,8 +35,8 @@ export class UserService {
 		return response.data;
 	}
 
-	async calculate(steamId: string): Promise<any> {
-		const response = await this._http.get<any>(`/user/calculator/${steamId}`,);
+	async getCalculation(steamId: string): Promise<UserCalculation | null> {
+		const response = await this._http.get<UserCalculation>(`/user/calculator/${steamId}`);
 
 		if (!response.status) {
 			return null;

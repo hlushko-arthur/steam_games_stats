@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from "@angular/core";
 import * as moment from 'moment';
 
 @Pipe({
-	name: 'dateFormat'
+	name: 'dateFormat',
+	standalone: true
 })
 
 export class DateFormatPipe implements PipeTransform {
@@ -15,6 +16,18 @@ export class DateFormatPipe implements PipeTransform {
 			format = 'MMM DD YYYY';
 		}
 
-		return moment.unix(unix).format(format);
+		let result = '';
+
+		if (format === 'years') {
+			const now = moment();
+
+			const date = moment.unix(unix);
+
+			result = (now.diff(date, 'years', true)).toFixed(1);
+		} else {
+			moment.unix(unix).format(format);
+		}
+
+		return result;
 	}
 }
