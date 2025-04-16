@@ -29,8 +29,6 @@ export class BackdropDirective implements OnInit, OnDestroy {
 
 		this.renderer.setStyle(host, 'position', 'relative');
 
-		this.renderer.setStyle(host, 'overflow', 'hidden');
-
 		this.renderer.setStyle(host, 'z-index', 0);
 
 		const isVideo = /\.(mp4|webm|ogg)$/i.test(this.source);
@@ -77,7 +75,7 @@ export class BackdropDirective implements OnInit, OnDestroy {
 	}
 
 	private styleBackdropElement(el: HTMLElement): void {
-		this.renderer.setStyle(el, 'position', 'absolute');
+		this.renderer.setStyle(el, 'position', 'fixed');
 
 		this.renderer.setStyle(el, 'top', '0');
 

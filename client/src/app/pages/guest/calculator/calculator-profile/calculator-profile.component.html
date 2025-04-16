@@ -1,13 +1,7 @@
 <ng-container>
-	<!-- <div class="backdrop"
-		[style.background-image]="'url(' + fs.profileBackground(user.background.icon) + ')'">
-	</div> -->
 	<div *ngIf="user?.steamId" class="container" [backdrop]="user.background.iconAnimated">
 		<div class="header">
 			<div class="header_user">
-				<!-- <img class="header_user_avatar"
-					src="https://avatars.steamstatic.com/acf67207768cdc5be5f09aca6a9f7830bf27d6f7_full.jpg"> -->
-
 					<w-user-avatar [size]="96" [avatar]="user.avatar.iconAnimated" [frame]="user.avatarFrame.iconAnimated"></w-user-avatar>
 
 				<div class="header_user_info">
@@ -25,11 +19,10 @@
 			</div>
 
 			<div class="header_stats">
-				<div class="header_stats_row">
-					<div class="header_stats_row_progress-bar">
+					<div class="header_stats_progress-bar">
 						<w-progress-bar [height]="12" [fill]="user.playedGamesPercent">
 							<ng-template w-progress-bar-title>
-								<div class="header_stats_row_progress-bar_title">
+								<div class="header_stats_progress-bar_title">
 									<div><span>{{user.playedGamesCount}}</span> out of <span>{{user.totalGamesCount}}</span> games played</div>
 									<div>{{user.playedGamesPercent}}%</div>
 								</div>
@@ -37,17 +30,16 @@
 						</w-progress-bar>
 					</div>
 
-					<div class="header_stats_row_progress-bar">
+					<div class="header_stats_progress-bar">
 						<w-progress-bar [height]="12" [value]="user.level.currentXP" [maxValue]="user.level.nextLevelXP">
 							<ng-template w-progress-bar-title>
-								<div class="header_stats_row_progress-bar_title">
+								<div class="header_stats_progress-bar_title">
 									<div><span>{{user.level.currentXP}}</span> / <span>{{user.level.nextLevelXP}}</span> XP to next level</div>
 									<div>{{user.level.totalXP}} XP</div>
 								</div>
 							</ng-template>
 						</w-progress-bar>
 					</div>
-				</div>
 			</div>
 
 			<div class="header_calculation">
