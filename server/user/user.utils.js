@@ -1,3 +1,121 @@
+import axios from 'axios';
+import jwt from 'jsonwebtoken';
+
+import User from './user.collection.js';
+import Game from '../game/game.collection.js';
+
+const API_KEY = process.env.STEAM_API_KEY;
+
+export async function fetchSteamProfile(steamId) {
+	await checkTokenState(steamId);
+
+	const profile = await User.findOne({ steamId });
+
+	let games = await getUserGames(steamId, profile.ACCESS_TOKEN)
+
+	games.sort((a, b) => b.rtime_last_played - a.rtime_last_played);
+
+	games = games.map((game) => {
+		return {
+			playtime: game.playtime_forever,
+			icon: game.img_icon_url,
+			_id: game.appid,
+			name: game.name,
+			lastPlayed: game.rtime_last_played,
+			achievements: game.achievements || [],
+			recentPlaytime: game.playtime_2weeks || 0,
+		}
+	})
+
+	const storedGameIds = [];
+
+	await Promise.all(games.map(async (game) => {
+		const storedGame = await Game.findOne({
+			_id: game._id
+		})
+
+		if (!storedGame) {
+			game.achievements = await getGameAchievements(game._id, steamId);
+
+			const gameDetails = await getGameDetails(game._id);
+
+			game.review = await getGameReviews(game._id);
+
+			Object.assign(game, gameDetails);
+
+			await Game.create(game);
+		} else {
+			storedGameIds.push(game._id);
+
+			Object.assign(game, storedGame.toObject());
+		}
+
+		await setUserAchievementsForGame(game.achievements, game._id, steamId);
+
+
+	}));
+
+	if (storedGameIds.length) {
+		const appIds = storedGameIds.join(',');
+
+		const prices = await getGamesPrice(appIds);
+
+		const operations = [];
+
+		for (const game of games) {
+			const newGamePrice = prices[game._id];
+
+			if (!newGamePrice) {
+				continue;
+			}
+
+			game.price = newGamePrice;
+
+			operations.push({
+				updateOne: {
+					filter: { _id: game._id },
+					update: {
+						$set: {
+							price: game.price
+						}
+					}
+				}
+			})
+		}
+
+		await Game.bulkWrite(operations);
+	}
+
+	games = games.map((game) => {
+		const achievementsUnlocked = game.achievements.filter((achievement) => achievement.achieved).length
+
+		return {
+			...game,
+			achievementsUnlocked: achievementsUnlocked,
+			isPerfect: game.achievements.length ? game.achievements.length === achievementsUnlocked : false,
+			completion: Math.floor(achievementsUnlocked / game.achievements.length * 100) || 0
+		}
+	})
+
+	const user = await getUserInformation(steamId);
+
+	await User.updateOne({
+		steamId: steamId
+	}, {
+		games: games,
+		user: user
+	}, {
+		upsert: true,
+		setDefaultsOnInsert: true
+	})
+
+	return {
+		steamId: user.steamId,
+		games,
+		user
+	}
+}
+
 export async function getUserInformation(steamId) {
 	const user = await getPlayerSummaries(steamId);
 
@@ -39,6 +157,168 @@ export async function getUserInformation(steamId) {
 	}
 }
 
+async function getUserGames(steamId, accessToken) {
+	const baseUrl = 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/';
+
+	const params = new URLSearchParams({
+		steamid: steamId,
+		include_appinfo: true,
+		include_played_free_games: true
+	})
+
+	if (accessToken) {
+		params.append('access_token', accessToken);
+	} else {
+		params.append('key', API_KEY);
+	}
+
+	const url = `${baseUrl}?${params.toString()}`;
+
+	try {
+		const response = await axios.get(url);
+		return response.data.response.games || [];
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getGameAchievements(appId, steamId) {
+	try {
+		const url = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${API_KEY}&appid=${appId}`;
+
+		const response = await axios.get(url);
+
+		if (!response.data.game.availableGameStats?.achievements) {
+			return [];
+		}
+
+		const achievements = response.data.game.availableGameStats.achievements;
+
+		const achievementsRarity = await getAchievementsRarityForGame(appId);
+
+		return achievements.map((achievement) => {
+			return {
+				icon: achievement.icon.match(/\/([A-z0-9]*\.jpg)/)[1],
+				iconGray: achievement.icongray.match(/\/([A-z0-9]*\.jpg)/)[1],
+				displayName: achievement.displayName,
+				apiName: achievement.name,
+				description: achievement.description,
+				rarity: achievementsRarity[achievement.name],
+			}
+		})
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function setUserAchievementsForGame(achievements, appId, steamId) {
+	try {
+		const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${API_KEY}&steamid=${steamId}&appid=${appId}`;
+
+		const response = await fetch(url);
+		const data = await response.json();
+
+		if (!data.playerstats.achievements) {
+			return [];
+		}
+
+		const userAchievements = data.playerstats.achievements.reduce((obj, achievement) => {
+			obj[achievement.apiname] = achievement;
+			return obj;
+		}, {});
+
+		for (const achievement of achievements) {
+			achievement.achieved = userAchievements[achievement.apiName].achieved;
+			achievement.unlockTime = userAchievements[achievement.apiName].unlocktime;
+		};
+
+		return achievements;
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getGameDetails(appId) {
+	try {
+		const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=US&l=en&filters=developers,publishers,price_overview,release_date,genres,metacritic`;
+
+		const response = await axios.get(url);
+
+		if (!response.data[appId].success) {
+			return {};
+		}
+
+		let data = response.data[appId].data;
+
+		data = {
+			developer: data.developers[0],
+			publisher: data.publishers[0],
+			price: {
+				currency: value.data.price_overview?.currency || 'USD',
+				initial: value.data.price_overview?.initial ?? 0,
+				initialFormatted: value.data.price_overview?.initial_formatted || '$0',
+				final: value.data.price_overview?.final ?? 0,
+				finalFormatted: value.data.price_overview?.final_formatted || '$0'
+			},
+			genres: (data.genres || []).map((genre) => genre.description),
+			releaseDate: data.release_date.date,
+			metacritic: data.metacritic
+		}
+
+		return data;
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getGamesPrice(appIds) {
+	try {
+		const url = `https://store.steampowered.com/api/appdetails?appids=${appIds}&cc=US&l=en&filters=price_overview`;
+
+		const response = await axios.get(url);
+
+		const prices = response.data;
+
+		for (const [key, value] of Object.entries(prices)) {
+			if (!value.success) {
+				delete prices[key];
+				continue;
+			}
+
+			prices[key] = {
+				currency: value.data.price_overview?.currency || 'USD',
+				initial: value.data.price_overview?.initial ?? 0,
+				initialFormatted: value.data.price_overview?.initial_formatted || '$0',
+				final: value.data.price_overview?.final ?? 0,
+				finalFormatted: value.data.price_overview?.final_formatted || '$0'
+			}
+		}
+
+		return prices;
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getGameReviews(appId) {
+	try {
+		const url = `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&num_per_page=0&purchase_type=all`;
+
+		const response = await axios.get(url);
+
+		const data = {
+			totalPositive: response.data.query_summary.total_positive,
+			totalNegative: response.data.query_summary.total_negative,
+			score: response.data.query_summary.review_score,
+			rating: Number((response.data.query_summary.total_positive / (response.data.query_summary.total_positive + response.data.query_summary.total_negative) * 100).toFixed(2)) || 0
+		}
+
+		return data;
+	} catch (error) {
+		throw error;
+	}
+};
+
 async function getPlayerSummaries(steamId) {
 	try {
 		const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${API_KEY}&steamids=${steamId}`;
@@ -67,64 +347,11 @@ async function getPlayerBadges(steamId) {
 
 		const badges = data.response.badges;
 
-		let specialBadges = 0;
-		let normalBadges = 0;
-		let foilBadges = 0;
-		let totalXP = 0;
-
-		let levels = {
-			1: 0,
-			2: 0,
-			3: 0,
-			4: 0,
-			5: 0,
-			"6+": 0
-		};
-
-		for (const badge of badges) {
-			totalXP += badge.xp;
-
-			if (badge.border_color === 1) {
-				foilBadges++;
-			}
-
-			if (badge.level <= 5) {
-				levels[badge.level]++;
-			} else {
-				levels['6+']++;
-			}
-
-			if ('appid' in badge) {
-				normalBadges++;
-			} else {
-				specialBadges++;
-			}
-		};
+		const totalXP = badges.reduce((total, { xp }) => total += xp, 0);
 
 		return {
 			totalXP,
-			badges: {
-				special: specialBadges,
-				default: normalBadges,
-				foil: foilBadges,
-				levels: {
-					'1': levels[1],
-					'2': levels[2],
-					'3': levels[3],
-					'4': levels[4],
-					'5': levels[5],
-					'6+': levels['6+']
-				},
-				items: badges.map((badge) => {
-					return {
-						_id: badge.badgeid,
-						level: badge.level,
-						xp: badge.xp,
-						appId: badge.appId,
-						isFoil: badge.border_color === 1
-					}
-				})
-			}
+			badges
 		}
 	} catch (error) {
 		throw error;
@@ -164,8 +391,8 @@ async function getPlayerAvatar(steamId) {
 			appId: avatarData.appid,
 			type: avatarData.item_type,
 			class: avatarData.item_class,
-			icon: avatarData.image_large.match(/\/([0-9A-z]*)\./)[1],
-			iconAnimated: avatarData.image_small.match(/\/([0-9A-z]*)\./)[1],
+			icon: avatarData.image_large.match(/\/([0-9]*\/[0-9A-z]*\.jpg)/)[1],
+			iconAnimated: avatarData.image_small.match(/\/([0-9]*\/[0-9A-z]*\.gif)/)[1],
 		}
 	} catch (error) {
 		throw error;
@@ -186,8 +413,8 @@ async function getAvatarFrame(steamId) {
 			appId: frame.appid,
 			type: frame.item_type,
 			class: frame.item_class,
-			icon: frame.image_large.match(/\/([0-9A-z]*)\./)[1],
-			iconAnimated: frame.image_small.match(/\/([0-9A-z]*)\./)[1],
+			icon: frame.image_large.match(/\/([0-9]*\/[0-9A-z]*\.png)/)[1],
+			iconAnimated: frame.image_small.match(/\/([0-9]*\/[0-9A-z]*\.png)/)[1],
 		}
 	} catch (error) {
 		throw error;
@@ -208,8 +435,8 @@ async function getProfileBackground(steamId) {
 			appId: background.appid,
 			type: background.item_type,
 			class: background.item_class,
-			icon: background.image_large.match(/\/([0-9A-z]*)\./)[1],
-			iconAnimated: background.movie_webm.match(/\/([0-9A-z]*)\./)[1],
+			icon: background.image_large.match(/\/([0-9]*\/[0-9A-z]*\.jpg)/)[1],
+			iconAnimated: background.movie_webm.match(/\/([0-9]*\/[0-9A-z]*\.webm)/)[1],
 		}
 	} catch (error) {
 		throw error;
@@ -230,8 +457,8 @@ async function getMiniProfileBackground(steamId) {
 			appId: background.appid,
 			type: background.item_type,
 			class: background.item_class,
-			icon: background.image_large.match(/\/([0-9A-z]*)\./)[1],
-			iconAnimated: background.movie_webm.match(/\/([0-9A-z]*)\./)[1],
+			icon: background.image_large.match(/\/([0-9]*\/[0-9A-z]*\.jpg)/)[1],
+			iconAnimated: background.movie_webm.match(/\/([0-9]*\/[0-9A-z]*\.webm)/)[1],
 		}
 	} catch (error) {
 		throw error;
@@ -266,149 +493,71 @@ async function getPlayerLevel(totalXP) {
 	}
 }
 
-export async function getUserGames(steamId, accessToken) {
-	const baseUrl = 'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/';
-
-	const params = new URLSearchParams({
-		steamid: steamId,
-		include_appinfo: true,
-		include_played_free_games: true
-	})
-
-	if (accessToken) {
-		params.append('access_token', accessToken);
-	} else {
-		params.append('key', API_KEY);
-	}
-
-	const url = `${baseUrl}?${params.toString()}`;
-
-	try {
-		const response = await axios.get(url);
-		return response.data.response.games || [];
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getGameAchievements(appId, steamId) {
-	try {
-		const url = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${API_KEY}&appid=${appId}`;
-
-		const response = await axios.get(url);
-
-		if (!response.data.game.availableGameStats) {
-			return [];
-		}
-
-		const achievements = (response.data.game.availableGameStats.achievements || []).reduce((obj, item) => {
-			obj[item.name] = item;
-			return obj;
-		}, {});
-
-		const userAchievements = await getUserAchievementsForGame(appId, steamId) || []
-
-		const percentageAchievements = await getAchievementPercentageForGame(appId);
-
-		for (const _achievement of userAchievements) {
-			achievements[_achievement.apiname].unlockTime = _achievement.unlocktime;
-
-			achievements[_achievement.apiname].achieved = true;
-		}
-
-		for (const _achievement of percentageAchievements) {
-			achievements[_achievement.name].rarity = _achievement.percent;
-		}
-
-		const regex = /\/([A-z0-9]*)\.jpg/
-
-		return Object.values(achievements).map((achievement) => {
-			return {
-				appId: appId,
-				icon: achievement.icon.match(regex)[1],
-				iconGray: achievement.icongray.match(regex)[1],
-				displayName: achievement.displayName,
-				name: achievement.name,
-				description: achievement.description,
-				achieved: achievement.achieved ?? false,
-				unlockTime: achievement.unlockTime,
-				rarity: achievement.rarity,
-			}
-		});
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getUserAchievementsForGame(appId, steamId) {
-	try {
-		const url = `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${API_KEY}&steamid=${steamId}&appid=${appId}`;
-
-		const response = await fetch(url);
-		const data = await response.json();
-		return (data.playerstats.achievements || []).filter((achievement) => achievement.achieved);
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function getAchievementPercentageForGame(appId) {
+async function getAchievementsRarityForGame(appId) {
 	try {
 		const url = `https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?key=${API_KEY}&gameid=${appId}`;
 
 		const response = await axios.get(url);
-		return response.data.achievementpercentages.achievements || [];
+		return (response.data.achievementpercentages.achievements || []).reduce((obj, achievement) => {
+			obj[achievement.name] = Number(achievement.percent);
+			return obj;
+		}, {});
+
 	} catch (error) {
 		throw error;
 	}
 }
 
-async function getGameDetails(appId) {
+async function checkTokenState(steamId) {
 	try {
-		const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=US&l=en&filters=developers,publishers,price_overview,release_date,genres,metacritic`;
+		const user = await User.findOne({
+			steamId: steamId
+		})
 
-		const response = await axios.get(url);
-
-		if (!response.data[appId].success) {
-			return {};
+		if (!user || !('ACCESS_TOKEN' in user)) {
+			return;
 		}
 
-		let data = response.data[appId].data;
+		console.log(user.ACCESS_TOKEN);
 
-		data = {
-			developer: data.developers[0],
-			publisher: data.publishers[0],
-			price: {
-				currency: data.price_overview?.currency || 'USD',
-				value: data.price_overview?.final ?? 0,
-				formatted: data.price_overview?.final_formatted || '$0'
+
+		console.log(jwt.decode(user.ACCESS_TOKEN));
+
+
+		const expTimestamp = jwt.decode(user.ACCESS_TOKEN).exp;
+
+		if (expTimestamp < (Date.now() / 1000)) {
+			const newAccessToken = await refreshAccessToken(user.REFRESH_TOKEN, steamId);
+
+			await User.updateOne({
+				steamId: steamId
+			}, {
+				ACCESS_TOKEN: newAccessToken
+			})
+
+			return newAccessToken;
+		}
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function refreshAccessToken(refreshToken, steamId) {
+	try {
+		const url = 'https://api.steampowered.com/IAuthenticationService/GenerateAccessTokenForApp/v1';
+
+		const response = await axios.post(url, null, {
+			params: {
+				key: API_KEY,
+				refresh_token: refreshToken,
+				steamid: steamId,
 			},
-			genres: (data.genres || []).map((genre) => genre.description),
-			releaseDate: data.release_date.date,
-			metacritic: data.metacritic
-		}
+		});
 
-		return data;
+		return response.data.response.access_token;
 	} catch (error) {
 		throw error;
 	}
 }
 
-async function getGameReviews(appId) {
-	try {
-		const url = `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&num_per_page=0&purchase_type=all`;
-
-		const response = await axios.get(url);
-
-		const data = {
-			totalPositive: response.data.query_summary.total_positive,
-			totalNegative: response.data.query_summary.total_negative,
-			score: response.data.query_summary.review_score,
-			rating: Number((response.data.query_summary.total_positive / (response.data.query_summary.total_positive + response.data.query_summary.total_negative) * 100).toFixed(2)) || 0
-		}
-
-		return data;
-	} catch (error) {
-		throw error;
-	}
-}
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));

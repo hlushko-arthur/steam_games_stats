@@ -1,17 +1,19 @@
 import mongoose from 'mongoose';
 
 const gameSchema = new mongoose.Schema({
-	totalAchievements: Number,
 	_id: Number,
 	icon: String,
 	name: String,
 	developer: String,
 	publisher: String,
 	releaseDate: String,
+	updatedAt: Number,
 	price: {
 		currency: String,
-		value: Number,
-		formatted: String,
+		initial: Number,
+		initialFormatted: String,
+		final: Number,
+		finalFormatted: String,
 	},
 	genres: [String],
 	review: {
@@ -24,7 +26,16 @@ const gameSchema = new mongoose.Schema({
 		score: Number,
 		url: String
 	},
-	createdAt: Number 
+	achievements: [{
+		displayName: String,
+		apiName: String,
+		icon: String,
+		iconGray: String,
+		description: String,
+		rarity: Number
+	}]
+}, {
+	versionKey: false
 })
 
 

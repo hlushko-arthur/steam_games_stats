@@ -144,11 +144,20 @@ router.post('/send_guard_code', async (req, res) => {
 })
 
 async function saveUser(session) {
-	const steamId = session.STEAMID;
+	const steamId = session.steamID;
 
 	let user = await User.findOne({
 		steamId: steamId
 	})
+
+	console.log('accessToken');
+	console.log(session.accessToken);
+
+
+	console.log('steamId', steamId);
+
+
+
 
 	if (!user) {
 		user = new User({

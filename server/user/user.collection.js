@@ -41,26 +41,13 @@ const userSchema = new mongoose.Schema({
 			icon: String,
 			iconAnimated: String,
 		},
-		badges: {
-			special: Number,
-			default: Number,
-			foil: Number,
-			levels: {
-				'1': Number,
-				'2': Number,
-				'3': Number,
-				'4': Number,
-				'5': Number,
-				'6+': Number
-			},
-			items: [{
-				_id: Number,
-				level: Number,
-				xp: Number,
-				appId: Number,
-				isFoil: Boolean
-			}]
-		},
+		badges: [{
+			_id: Number,
+			level: Number,
+			xp: Number,
+			appId: Number,
+			isFoil: Boolean
+		}],
 		level: {
 			currentXP: Number,
 			totalXP: Number,
@@ -101,8 +88,10 @@ const userSchema = new mongoose.Schema({
 		releaseDate: String,
 		price: {
 			currency: String,
-			value: Number,
-			formatted: String,
+			initial: Number,
+			initialFormatted: String,
+			final: Number,
+			finalFormatted: String,
 		},
 		genres: [String],
 		review: {
